@@ -86,6 +86,7 @@ def get_image(url, directory="./"):
         print("request error")
     except (ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
         print("connection error")
+    return ""
 
 
 def extract_recipe(html):

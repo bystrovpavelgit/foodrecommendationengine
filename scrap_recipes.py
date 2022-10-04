@@ -24,7 +24,7 @@ if __name__ == "__main__":
             detail = get_html(url)
             if detail:
                 name, photo, ingredient_list, items, dirs = extract_recipe(detail)
-                image = "" if image is None else get_image(photo, BASE_DIR)
+                image = get_image(photo, BASE_DIR) if photo else ""
                 note = Note(name=name,
                             pic_url=photo,
                             pic=image,
