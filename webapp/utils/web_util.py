@@ -1,6 +1,7 @@
 """web util"""
 import requests
 from requests import ReadTimeout, ConnectTimeout, Timeout
+from requests.exceptions import HTTPError
 
 
 def get_html(link):
@@ -9,8 +10,8 @@ def get_html(link):
         result = requests.get(link, timeout=8.0)
         result.raise_for_status()
         return result.text
-    except (ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
-        print("connection error")
+    except (HTTPError, ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
+        print("connection ошибка")
     except(requests.RequestException, ValueError):
-        print('Сетевая ошибка')
+        print('ошибка')
     return False
