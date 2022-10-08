@@ -17,7 +17,7 @@ def get_loaded_urls():
     result = [note.url for note in res]
     return result
 
-        
+
 if __name__ == "__main__":
     with open("dishes.json", "r", encoding="utf-8") as f:
         dish_list = json.load(f)
