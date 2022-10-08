@@ -5,7 +5,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from requests import ReadTimeout, ConnectTimeout, Timeout
-
+from requests.exceptions import HTTPError
 
 def load_eda_ru_urls(html):
     """ extract urls from html page"""
@@ -75,17 +75,18 @@ def get_image(url, directory="./"):
     index = url[:tmp_index].rfind("/") + 1
     img_name = url[index:].replace("/", "-")
     try:
-        time.sleep(10)
+        time.sleep(9)
         img_request = requests.get(url, timeout=8.0)
         img_request.raise_for_status()
         with open(os.path.join(directory, img_name), "wb") as img:
             img.write(img_request.content)
             img.close()
             return img_name
-    except ValueError:
-        print("request error")
-    except (ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
+    except (ConnectTimeout, ReadTimeout, Timeout, ConnectionError, HTTPError):
         print("connection error")
+    except(requests.RequestException, ValueError):
+        print('ошибка')
+    return ""
 
 
 def extract_recipe(html):
