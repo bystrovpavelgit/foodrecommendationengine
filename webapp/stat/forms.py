@@ -4,12 +4,23 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class RecommendForm(FlaskForm):
+class RecommendByTypeForm(FlaskForm):
     """ class RecommendForm """
+    search = StringField("Что искать",
+        validators=[DataRequired()],
+        render_kw={"class": "form-control"})
     dish_type = StringField("Тип блюда",
         validators=[DataRequired()],
         render_kw={"class": "form-control"})
-    recipe_type = StringField("К какой кухне относится рецепт",
+    submit = SubmitField("порекоммендовать", render_kw={"class": "btn btn-primary"})
+
+
+class RecommendCuisineForm(FlaskForm):
+    """ class RecommendForm """
+    search = StringField("Что искать",
         validators=[DataRequired()],
         render_kw={"class": "form-control"})
-    submit = SubmitField("searcht", render_kw={"class": "btn btn-primary"})
+    cuisine = StringField("Тип кухни",
+        validators=[DataRequired()],
+        render_kw={"class": "form-control"})
+    submit = SubmitField("порекоммендовать", render_kw={"class": "btn btn-primary"})
