@@ -23,4 +23,5 @@ class RecommendCuisineForm(FlaskForm):
     cuisine = StringField("Тип кухни",
         validators=[DataRequired()],
         render_kw={"class": "form-control"})
-    submit = SubmitField("порекоммендовать", render_kw={"class": "btn btn-primary"})
+    submit = SubmitField("порекоммендовать",
+        render_kw={"class": "btn btn-primary"})
