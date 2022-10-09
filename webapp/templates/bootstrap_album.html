@@ -98,10 +98,25 @@
   </div>
 </header>
 
-  <main>
-    {% include "nav_bar.html" %}
+<main>
+
+  <section class="py-5 text-center container">
+    <div class="row py-lg-5">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Album example</h1>
+        <p class="lead text-muted">the collection below: contents and the creator</p>
+        <p>
+          <a href="#" class="btn btn-primary my-2">Main button</a>
+          <a href="#" class="btn btn-secondary my-2">Secondary button</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="album py-5 bg-light">
     {% block content %} {% endblock %}
-  </main>
+  </div>
+</main>
 
     <!-- Optional JavaScript; choose one of the two! -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
