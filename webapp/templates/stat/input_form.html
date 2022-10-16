@@ -1,0 +1,44 @@
+{% extends "bootstrap.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+        </div>
+        <div class="col-8">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+				<div class="alert alert-warning" role="alert">
+					{% for message in messages %}
+						{{ message }} <br>
+					{% endfor %}
+				</div>
+				{% endif %}
+			{% endwith %}
+            <form action="/stat/fill_recipe/{{ num }}" method="POST">
+				{{ form.hidden_tag() }}
+				<div class="form-group">
+					{{ form.dish.label }}<br>
+					{{ form.dish() }}<br>
+				</div>
+				<div class="form-floating">
+				  <!--textarea class="form-control" id="floatingTextarea2" style="height: 100px"> placeholder=""
+				  </textarea>
+				  <label for="floatingTextarea2">{{ form.directions.label }}
+				  </label-->
+					{{ form.directions.label }} <br>
+					{{ form.directions() }} <br>
+				</div>
+				{% for my_form in form.rows %}
+					<div class="input-group">
+					  <span class="input-group-text"> ингредиент и количество </span>
+						{% for field in my_form %}
+							{{ field() }}
+						{% endfor %}
+					</div>
+				{% endfor %}
+				{{ form.submit }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -11,7 +11,7 @@ from webapp.stat.views import blueprint as stat_blueprint
 
 def create_app():
     """ starting app for Flask object detection site """
-    app = Flask(__name__, static_url_path="/webapp/static")
+    app = Flask(__name__, static_url_path="/static/", static_folder="/static/")
     app.config.from_pyfile("config.py")
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -27,8 +27,8 @@ def create_app():
         return user
 
 
-    def process_file(request):
-        file = request.files["file"]
+    def process_file(req):
+        file = req.files["file"]
         if file:
             os.makedirs("webapp/static", exist_ok=True)
             file_name = os.path.join("webapp", "static", file.filename)
@@ -39,30 +39,6 @@ def create_app():
     @app.route("/")
     def index():
         return render_template("index.html")
-
-
-    @app.route("/cars/", methods = ["GET", "POST"])
-    def count_cars():
-        if request.method =="POST":
-            file_name = process_file(request)
-            if file_name is None:
-                flash("Ошибка загрузки файла")
-                return redirect(url_for("index"))
-            answer = []
-            return render_template("show_cars.html")
-        return render_template("submit.html", main_text="Count cars")
-
-
-    @app.route("/defects/", methods = ["GET", "POST"])
-    def detect_defects():
-        if request.method =="POST":
-            file_name = process_file(request)
-            if file_name is None:
-                flash("Ошибка загрузки файла")
-                return redirect(url_for("index"))
-            answer = []
-            return render_template("show_result.html")
-        return render_template("submit.html", main_text="Detect defects")
 
 
     return app

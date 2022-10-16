@@ -10,10 +10,26 @@ from pymystem3 import Mystem
 my_stopwords = stopwords.words('russian')
 m = Mystem()
 MAX_LEN = 400
+TYPE_MAP = {"вторые блюда": 1,
+            "десерты": 2,
+            "завтраки": 3,
+            "закуски": 4,
+            "салаты": 5,
+            "соусы": 6,
+            "супы и первые блюда": 7,
+            }
+CUISINES = {"европейская": 1,
+            "русская": 2,
+            "венгерская": 1,
+            "сербская": 1,
+            "азиатская": 3,
+            "африканская": 4,
+            "мексиканская": 5,
+            }
 
 
 def replace_special_chars(text):
-    """ replace special chars """
+    """ replace special chars4:  """
     specials = [("¼", "четверть"), ("½", "половина"), ("⅓", "треть"), ("¾", "три четверти")]
     for tuple_ in specials:
         text = text.replace(tuple_[0], tuple_[1])
@@ -25,7 +41,7 @@ def tokenize(text):
     txt = text.replace(".", " ЕОС ") \
         .replace(";", " ЕОС ") \
         .replace("!", " ЕОС ") \
-        .replace("?", " ЕОС ")\
+        .replace("?", " ЕОС ") \
         .replace('\n', "")
     tokenizer = RegexpTokenizer(r'[0-9A-Fa-fА-Яа-я\-\`\,]+')
     txt = tokenizer.tokenize(txt)
@@ -142,7 +158,7 @@ def remove_duplicates(data, mera):
 
 def pad(arr, padding, max_len=MAX_LEN):
     """ pad to 400 words"""
-    result = arr + ([padding]*(max_len - len(arr)))
+    result = arr + ([padding] * (max_len - len(arr)))
     return result
 
 
@@ -168,4 +184,19 @@ def recipe_to_mult_texts(recipe, syn_map, end_token):
     arr = [f"{i.strip()} {element.strip()}" for i, element in zip(ingredients, measures)]
     ingredients_tokenized = lemmatize(tokenize(" ".join(arr)))
     all_ingredients = [ingredients_tokenized] * 6
-    return directions, all_ingredients
+    all_types = [(TYPE_MAP[recipe.typed], CUISINES[recipe.cusine])] * 6
+    return directions, all_ingredients, all_types
+
+
+def tokenize_recipe(recipe, end_token):
+    """ convert recipe to text """
+    arr = get_text_array(replace_special_chars(recipe[0]["directions"].lower()))
+    name_tokenized = tokenize(recipe[0]["name"].lower()) + [end_token]
+    directions_tokenized = lemmatize(tokenize(" ".join(arr)))
+    directions_tokenized = name_tokenized + directions_tokenized
+    ingredients = get_text_array(recipe[0]["ingredients"].lower().replace(".", ","))
+    measures = get_text_array(replace_special_chars(recipe[0]["mera"].lower().replace(".", ",")))
+    ingredients, measures = remove_duplicates(ingredients, measures)
+    arr = [f"{i.strip()} {element.strip()}" for i, element in zip(ingredients, measures)]
+    ingredients_tokenized = lemmatize(tokenize(" ".join(arr)))
+    return directions_tokenized, ingredients_tokenized
