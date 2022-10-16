@@ -39,8 +39,8 @@ if __name__ == "__main__":
              "/sendvichi": 'закуски',
              }
     dish_list = []
-    for element in reversed(list(cusine_map.items())):
-        for type_ in reversed(list(types.items())):
+    for element in cusine_map.items():
+        for type_ in types.items():
             url = "https://eda.ru/recepty" + element[0] + type_[0]
             time.sleep(9)
             html = get_html(url)
@@ -49,6 +49,6 @@ if __name__ == "__main__":
                 urls = load_eda_ru_urls(html)
                 for url_ in urls:
                     dish_list.append({"url": url_, "cusine": element[1], "type": type_[1]})
-    with open("dishes.json", "w", encoding="utf-8") as f:
+    with open("more_dishes.json", "w", encoding="utf-8") as f:
         json.dump(dish_list, f)
     print("Done")
