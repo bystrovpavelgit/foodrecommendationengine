@@ -1,4 +1,5 @@
-"""DL constants"""
+
+"""DL models to predict dish types """
 import numpy as np
 import pickle
 from tensorflow import keras
@@ -27,14 +28,13 @@ def predict_types(recipe):
     ingredients = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part2], 0)[:100]
     res = dirs + ingredients
 
-    model = keras.models.load_model("/media/pavel/20/rnn2_with_embed.h5")
+    model = keras.models.load_model("models/rnn2_with_embed.h5")
     arr = np.array([res])
     pred = model.predict(arr[..., None])
     c_pred = np.argmax(pred)
-    model = keras.models.load_model("/media/pavel/20/rnn2_dish_pred7.h5")
+    model = keras.models.load_model("models/rnn2_dish_pred7.h5")
     arr = np.array([res])
     pred = model.predict(arr[..., None])
     type_pred = np.argmax(pred)
     print("result", CUISINES[c_pred], TYPE_MAP[type_pred])
     return CUISINES[c_pred], TYPE_MAP[type_pred]
-

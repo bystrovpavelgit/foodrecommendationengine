@@ -16,10 +16,15 @@ with app.app_context():
     syn_map = process_synsets(csvfile="./data/yarn-synsets.csv")
     continuous_text = []
     texts = []
-    for recipe in Note.query.limit(2000):
-        dirs, ingredients = recipe_to_mult_texts(recipe,
-                                                 syn_map, special_tokens[0])
+    results = []
+    results2 = []
+    for recipe in Note.query.order_by(Note.id).limit(3300):
+        dirs, ingredients, y_true = recipe_to_mult_texts(recipe,
+                                                         syn_map,
+                                                         special_tokens[0])
         for k in range(6):
+            results.append(y_true[k][0])
+            results2.append(y_true[k][1])
             continuous_text = continuous_text + dirs[k] + ingredients[k]
             texts.append((dirs[k], ingredients[k]))
     counts = nltk.FreqDist(continuous_text).most_common(20000)
@@ -37,3 +42,7 @@ with app.app_context():
         pickle.dump(num_texts, f)
     with open("vocabulary.pkl", "wb") as f:
         pickle.dump(vocab, f)
+    with open("y_gt1.pkl", "wb") as f:
+        pickle.dump(results, f)
+    with open("y_gt2.pkl", "wb") as f:
+        pickle.dump(results2, f)
