@@ -1,7 +1,7 @@
 """ Flask app """
-import os
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from webapp.db import DB
 from webapp.user.models import User
 from webapp.stat.models import Recipe
@@ -19,26 +19,15 @@ def create_app():
     DB.init_app(app)
     app.register_blueprint(user_blueprint)
     app.register_blueprint(stat_blueprint)
-
+    migrate = Migrate(app, DB)
 
     @login_manager.user_loader
     def load_user(user_id):
         user = User.query.get(user_id)
         return user
 
-
-    def process_file(req):
-        file = req.files["file"]
-        if file:
-            os.makedirs("webapp/static", exist_ok=True)
-            file_name = os.path.join("webapp", "static", file.filename)
-            file.save(file_name)
-            return file_name
-
-
     @app.route("/")
     def index():
         return render_template("index.html")
-
 
     return app
