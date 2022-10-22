@@ -1,3 +1,4 @@
+
 """DL models to predict dish types """
 import numpy as np
 import pickle
@@ -37,4 +38,3 @@ def predict_types(recipe):
     type_pred = np.argmax(pred)
     print("result", CUISINES[c_pred], TYPE_MAP[type_pred])
     return CUISINES[c_pred], TYPE_MAP[type_pred]
-
