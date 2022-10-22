@@ -1,14 +1,13 @@
 """ import fasttext
 """
 import csv
-from copy import copy
+from copy import copy, deepcopy
 import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from pymystem3 import Mystem
 
 my_stopwords = stopwords.words('russian')
-m = Mystem()
 MAX_LEN = 400
 TYPE_MAP = {"вторые блюда": 1,
             "десерты": 2,
@@ -36,27 +35,29 @@ def replace_special_chars(text):
     return text
 
 
-def tokenize(text):
+def tokenize(text: str) -> list:
     """ tokenize """
     txt = text.replace(".", " ЕОС ") \
         .replace(";", " ЕОС ") \
         .replace("!", " ЕОС ") \
         .replace("?", " ЕОС ") \
         .replace('\n', "")
-    tokenizer = RegexpTokenizer(r'[0-9A-Fa-fА-Яа-я\-\`\,]+')
+    tokenizer = RegexpTokenizer(r'[0-9A-Fa-fА-Яа-я\-\`\,ё]+')
     txt = tokenizer.tokenize(txt)
     return txt
 
 
-def remove_stopwords(words, the_stopwords=my_stopwords):
+def remove_stopwords(words: list) -> str:
     """ remove stopwords """
+    the_stopwords = my_stopwords
     res = " ".join([token for token in words
                     if token not in the_stopwords]).strip()
     return res
 
 
-def lemmatize(text, mystem=Mystem()):
+def lemmatize(text: list) -> list:
     """ lemmatize """
+    mystem = Mystem()
     text = " ".join(text)
     return [w for w in mystem.lemmatize(text) if w not in [" ", "\n"]]
 
@@ -80,64 +81,30 @@ def process_synsets(csvfile="./data/yarn-synsets.csv"):
     return syn_map
 
 
-def get_rand_lemma(lemmas, syn_map):
-    """ get rand lemma """
-    ndx = np.random.randint(len(lemmas))
-    if lemmas[ndx] in syn_map:
-        return lemmas[ndx]
-    ndx = np.random.randint(len(lemmas))
-    if lemmas[ndx] in syn_map:
-        return lemmas[ndx]
-    return False
+def get_3_rand_indices(lemmas, syn_map):
+    """ get 3 random indices """
+    num = len(lemmas)
+    synonyms_exist = np.array([ndx for ndx in range(num) if lemmas[ndx] in syn_map])
+    np.random.shuffle(synonyms_exist)
+    return synonyms_exist.tolist()[:3]
 
 
-def get_lemma(lemmas, syn_map):
-    """ get lemma """
-    result = get_rand_lemma(lemmas, syn_map)
-    if not result:
-        for lemma in lemmas:
-            if lemma in syn_map:
-                result = lemma
-                break
-        if not result:
-            return False
+def get_random_synonyms(lemmas, indices, syn_map):
+    """ get 3 random synonyms with its index """
+    result = [(np.random.choice(syn_map[lemmas[ndx]]), ndx) for ndx in indices]
     return result
-
-
-def find_3_synonyms(lemmas, syn_map):
-    """ insert synonyms """
-    lemma1 = get_lemma(lemmas, syn_map)
-    if not lemma1:
-        return "", "", ""
-    lemma2 = get_lemma(lemmas, syn_map)
-    if not lemma2:
-        return lemma1, "", ""
-    lemma3 = get_lemma(lemmas, syn_map)
-    if not lemma3:
-        return lemma1, lemma2, ""
-    return lemma1, lemma2, lemma3
-
-
-def get_rand_synonym(lst):
-    """ get random synonym """
-    if not lst:
-        index = np.random.randint(len(lst))
-        return lst[index]
-    return False
 
 
 def get_similar_directions(directions_tokenized, syn_map):
     """ get similar directions  """
     result = []
     for i in range(5):
-        lemmas = find_3_synonyms(directions_tokenized, syn_map)
-        synonyms = [get_rand_synonym(syn_map[lemmas[i]]) for i in range(3)]
-        new_tokens = directions_tokenized
-        for k in range(3):
-            if synonyms[k]:
-                new_tokens = [e if e != lemmas[k] else synonyms[k]
-                              for e in new_tokens]
-        result.append(new_tokens)
+        indices = get_3_rand_indices(directions_tokenized, syn_map)
+        synonyms = get_random_synonyms(directions_tokenized, indices, syn_map)
+        new_directions = deepcopy(directions_tokenized)
+        for words, n in synonyms:
+            new_directions[n] = words
+        result.append(lemmatize(tokenize(" ".join(new_directions))))
     return result
 
 
