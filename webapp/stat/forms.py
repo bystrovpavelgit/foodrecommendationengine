@@ -31,10 +31,10 @@ class RecommendCuisineForm(FlaskForm):
 class LapForm(Form):
     """ Subform """
     ingredient = StringField('ингредиент',
-                             validators=[validators.InputRequired(), validators.Length(max=150)],
+                             validators=[DataRequired(), validators.Length(max=150)],
                              render_kw={"class": "form-control"})
     how_much = StringField('сколько',
-                           validators=[validators.InputRequired(), validators.Length(max=150)],
+                           validators=[DataRequired(), validators.Length(max=150)],
                            render_kw={"class": "form-control"})
 
 
@@ -58,7 +58,7 @@ class NumberOfIngredientsForm(FlaskForm):
     submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
 
 
-class VoutingForm(FlaskForm):
+class VotingForm(FlaskForm):
     """ class RecommendForm """
     stars = IntegerField("Оценка",
                              validators=[DataRequired()],

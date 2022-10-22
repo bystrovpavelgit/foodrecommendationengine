@@ -1,13 +1,13 @@
 """blueprint for statistics"""
 from flask import render_template, flash, redirect, url_for, Blueprint, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import FormField, FieldList, StringField, SubmitField
 from wtforms.validators import DataRequired
-from webapp.business_logic import insert_recipe_data
+from webapp.business_logic import insert_recipe_data, add_rating_for_author
 from webapp.dl import predict_types
 from webapp.stat.forms import RecommendByTypeForm, RecommendCuisineForm, \
-    NumberOfIngredientsForm, LapForm
+    NumberOfIngredientsForm, LapForm, VotingForm
 
 blueprint = Blueprint("stat", __name__, url_prefix="/stat")
 
@@ -64,7 +64,7 @@ def search_cuisine():
                    " на растительном масле до мягкости.",
                    "Чеснок 1 зубчик, Морковь 2 штуки, Репчатый лук 1 головка"]
             return render_template("stat/recipe.html", main_img="/5.jpg", answers=arr)
-        flash("Ошибка загрузки")
+        flash("Ошибка валидации")
         return redirect(url_for("stat.search_cuisine"))
     return render_template("stat/search_cuisine.html", title=title, form=form)
 
@@ -99,7 +99,6 @@ def fill_recipe(num):
                                  render_kw={"class": "form-control"})
         rows = FieldList(FormField(LapForm), min_entries=num)
         submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
-
     title = "Fill Recipe"
     form = RecipeForm2()
     if request.method == "POST":
@@ -121,6 +120,24 @@ def fill_recipe(num):
             insert_recipe_data(data)
             flash(f"Данные сохранены")
             return render_template("index.html")
-        flash("Ошибка загрузки")
+        flash("Ошибка валидации")
         return redirect(f"/stat/fill_recipe/{num}")
     return render_template("stat/input_form.html", num=num, title=title, form=form)
+
+
+@blueprint.route("/rate_recipe/<int:rec_id>", methods=["GET", "POST"])
+@login_required
+def rate_recipe(rec_id):  # TO_DO make small window in window vote
+    """ simple cuisine recommendation """
+    title = "How many ingredients"
+    form = VotingForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            user = current_user
+            recipe_id = int(rec_id)
+            add_rating_for_author(int(form.stars.data), user.username, recipe_id)
+            flash(f"Данные сохранены")
+            return render_template("index.html")
+        flash("Ошибка валидации")
+        return redirect(f"/stat/rate_recipe/{rec_id}")
+    return render_template("stat/rate_recipe.html", rec_id=rec_id, title=title, form=form)
