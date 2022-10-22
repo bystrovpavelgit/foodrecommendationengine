@@ -1,15 +1,27 @@
-"""business logic"""
+""" business logic functionality """
 from bs4 import BeautifulSoup
-from webapp.db import DB
-from webapp.stat.models import Note
 import requests
+from webapp.db import DB
+from webapp.stat.models import Note, Author, Interactions
+
+
+def add_rating_for_author(rating, name, recipe_id):
+    """ insert rating for author """
+    author = None
+    if name:
+        author = Author.query.filter(Author.name == name).first()
+    author_id = author.id if author else -1
+    DB.session.add(Interactions(rating=rating, author_id=author_id, recipe_id=recipe_id))
+    DB.session.commit()
+    return True
 
 
 def find_data_by_cuisine(search, cuisine):
     """ find recipe by cuisine """
     tmp = search
     if Note.query.filter(Note.cusine == cuisine).count() > 0:
-        return Note.query.filter(Note.cusine == cuisine).first()
+        note = Note.query.filter(Note.cusine == cuisine).first()
+        return note
 
 
 def insert_recipe_data(data):
@@ -31,6 +43,7 @@ def delete_recipe_data(id_):
 
 
 def get_html(url):
+    """ get html function """
     try:
         result = requests.get(url)
         result.raise_for_status()
@@ -41,14 +54,8 @@ def get_html(url):
 
 
 def get_python_news(url):
-    try:
-        result = requests.get(url)
-        result.raise_for_status()
-        html = result.text
-    except(requests.RequestException, ValueError):
-        print("error")
-        return False
-
+    """ get python news """
+    html = get_html(url)
     if html:
         soup = BeautifulSoup(html, "html.parser")
         all_news = soup.find("ul", class_="list-recent-posts").findAll("li")
