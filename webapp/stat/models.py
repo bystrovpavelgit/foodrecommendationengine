@@ -10,10 +10,10 @@ class Recipe(DB.Model):
     __tablename__ = "recipe"
     id = DB.Column(DB.Integer, primary_key=True)
     author_id = DB.Column(DB.Integer)
-    dish_type = DB.Column(DB.String(64))
-    cusine_type = DB.Column(DB.String(64))
-    name = DB.Column(DB.String(200))
-    cooking = DB.Column(DB.String(1500))
+    dish_type = DB.Column(DB.String(100))
+    cusine_type = DB.Column(DB.String(100))
+    name = DB.Column(DB.String(300))
+    cooking = DB.Column(DB.String(2000))
     minutes = DB.Column(DB.Integer)
     old_id = DB.Column(DB.Integer)
 
@@ -75,6 +75,7 @@ class Interactions(DB.Model):
     __tablename__ = "interactions"
     author_id = DB.Column(DB.Integer, primary_key=True)
     recipe_id = DB.Column(DB.Integer, primary_key=True)
+    created = DB.Column(DB.Date)
     rating = DB.Column(DB.Float)
 
     def __repr__(self):
