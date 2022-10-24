@@ -1,7 +1,6 @@
-
-"""DL models to predict dish types """
-import numpy as np
+"""DL constants"""
 import pickle
+import numpy as np
 from tensorflow import keras
 from webapp.utils.nlp_util import tokenize_recipe, truncate_or_pad
 
@@ -21,8 +20,8 @@ CUISINES = {0: "европейская",
 
 def predict_types(recipe):
     """ predict_types """
-    with open("models/vocabulary.pkl", "rb") as f:
-        vocab = pickle.load(f)
+    with open("models/vocabulary.pkl", "rb") as v_file:
+        vocab = pickle.load(v_file)
     part1, part2 = tokenize_recipe(recipe, "еос")
     dirs = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part1], 0)
     ingredients = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part2], 0)[:100]
@@ -31,10 +30,10 @@ def predict_types(recipe):
     model = keras.models.load_model("models/rnn2_with_embed.h5")
     arr = np.array([res])
     pred = model.predict(arr[..., None])
-    c_pred = np.argmax(pred)
+    cuisine = np.argmax(pred)
     model = keras.models.load_model("models/rnn2_dish_pred7.h5")
     arr = np.array([res])
     pred = model.predict(arr[..., None])
     type_pred = np.argmax(pred)
-    print("result", CUISINES[c_pred], TYPE_MAP[type_pred])
-    return CUISINES[c_pred], TYPE_MAP[type_pred]
+    print("result", CUISINES[int(cuisine)], TYPE_MAP[int(type_pred)])
+    return CUISINES[int(cuisine)], TYPE_MAP[int(type_pred)]
