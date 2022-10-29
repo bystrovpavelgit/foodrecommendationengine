@@ -30,5 +30,6 @@ libuv
 ninja
 flask-migrate
 nltk
+sqlalchemy
 tensorflow
 bs4
