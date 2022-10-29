@@ -1,6 +1,8 @@
 """ business logic functionality """
 from datetime import date
 from bs4 import BeautifulSoup
+from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError
+from sqlite3 import IntegrityError
 from webapp.db import DB
 from webapp.stat.models import Note, Author, Interactions
 from webapp.utils.web_util import get_html
@@ -29,19 +31,22 @@ def insert_or_update_rating(rating, name, recipe_id):
     if name:
         author = Author.query.filter(Author.name == name).first()
         author_id = author.id if author else -1
-        cur = date.today()
-        if Interactions.query.filter(Interactions.author_id == author_id
-                                     and Interactions.recipe_id == recipe_id).count() > 0:
-            interact = Interactions.query.filter(
-                Interactions.author_id == author_id and Interactions.recipe_id == recipe_id).first()
-            interact.rating = rating
-            interact.created = cur
-            DB.session.commit()
-        else:
+        cur_date = date.today()
+        try:
             DB.session.add(Interactions(rating=rating,
                                         author_id=author_id,
                                         recipe_id=recipe_id,
-                                        created=cur))
+                                        created=cur_date))
+            print(f"insert {author.id}", rating, cur_date)
+            DB.session.commit()
+        except (SQLAlchemyError, IntegrityError, PendingRollbackError) as e:
+            error = str(e.__dict__['orig'])
+            print(error)
+            DB.session.rollback()
+            interact = Interactions.query.filter(
+                Interactions.author_id == author_id and Interactions.recipe_id == recipe_id).first()
+            interact.rating = rating
+            interact.created = cur_date
             DB.session.commit()
 
 
