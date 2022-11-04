@@ -1,0 +1,56 @@
+{% extends "bootstrap.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-2">
+        </div>
+        <div class="col-8">
+            {% with msgs = get_flashed_messages() %}
+				{% if msgs %}
+				<div class="alert alert-warning" role="alert">
+					{% for msg in msgs %}
+						{{ msg }}<br>
+					{% endfor %}
+				</div>
+				{% endif %}
+			{% endwith %}
+			{% for message in messages %}
+                <center>{{ message }}</center>
+                <br>
+			{% endfor %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Ингредиенты</th>
+                  <th scope="col">Количество</th>
+                </tr>
+              </thead>
+              <tbody>
+			    {% for elem in items %}
+                <tr class="{{ elem[0] }}">
+                  <th scope="row"> </th>
+                  <td>{{ elem[1] }}</td>
+                  <td>{{ elem[2] }}</td>
+                </tr>
+			    {% endfor %}
+              </tbody>
+            </table>
+            <form action="/recommend/recipe/{{ num }}" method="POST">
+                <div class="form-group">
+					Оцените рецепт:<br>
+				</div>
+                <input type="submit" value="1" name="action" class="btn btn-primary" />
+                <input type="submit" value="2" name="action" class="btn btn-primary" />
+                <input type="submit" value="3" name="action" class="btn btn-primary" />
+                <input type="submit" value="4" name="action" class="btn btn-primary" />
+                <input type="submit" value="5" name="action" class="btn btn-primary" />
+            </form>
+              <br>
+            <img src="{{ main_img }}" class="img-fluid" alt="Responsive image">
+        </div>
+        <div class="col-2">
+        </div>
+    </div>
+</div>
+{% endblock %}
