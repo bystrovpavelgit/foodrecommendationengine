@@ -1,7 +1,7 @@
 """ import fasttext
 """
 import csv
-from copy import copy, deepcopy
+from copy import copy
 import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
@@ -28,11 +28,22 @@ CUISINES = {"европейская": 1,
 
 
 def replace_special_chars(text):
-    """ replace special chars4:  """
+    """ replace special chars:  """
     specials = [("¼", "четверть"), ("½", "половина"), ("⅓", "треть"), ("¾", "три четверти")]
     for tuple_ in specials:
         text = text.replace(tuple_[0], tuple_[1])
     return text
+
+
+def str_to_list(text: str) -> list:
+    """ convert text with comma-delimiters to list and
+    replace special chars as spaces """
+    txt = text.replace("[", "") \
+        .replace("]", "") \
+        .replace("'", "") \
+        .replace("\n", "")
+    result = [elem.strip() for elem in txt.split(",")]
+    return result
 
 
 def tokenize(text: str) -> list:
@@ -59,24 +70,24 @@ def lemmatize(text: list) -> list:
     """ lemmatize """
     mystem = Mystem()
     text = " ".join(text)
-    return [w for w in mystem.lemmatize(text) if w not in [" ", "\n"]]
+    return [wo for wo in mystem.lemmatize(text) if wo not in [" ", "\n"]]
 
 
 def process_synsets(csvfile="./data/yarn-synsets.csv"):
     """ process YARN synonyms """
     syn_map = {"": []}
-    with open(csvfile, "r") as f:
+    with open(csvfile, "r") as csvf:
         fields = ['id', 'words', 'grammar', 'domain']
-        data = csv.DictReader(f, fields, delimiter=',')
+        data = csv.DictReader(csvf, fields, delimiter=',')
         for row in data:
             if row["words"] is None:
                 continue
             words = row["words"].split(";")
             if len(words) > 1:
-                for w in words:
+                for word in words:
                     tmp = copy(words)
-                    tmp.remove(w)
-                    syn_map[w] = tmp
+                    tmp.remove(word)
+                    syn_map[word] = tmp
     print(f"map len = {len(syn_map)}")
     return syn_map
 
@@ -101,9 +112,9 @@ def get_similar_directions(directions_tokenized, syn_map):
     for i in range(5):
         indices = get_3_rand_indices(directions_tokenized, syn_map)
         synonyms = get_random_synonyms(directions_tokenized, indices, syn_map)
-        new_directions = deepcopy(directions_tokenized)
-        for words, n in synonyms:
-            new_directions[n] = words
+        new_directions = copy(directions_tokenized)
+        for words, index in synonyms:
+            new_directions[index] = words
         result.append(lemmatize(tokenize(" ".join(new_directions))))
     return result
 

@@ -29,7 +29,6 @@ def insert_recipe_data(data):
     if data:
         DB.session.bulk_insert_mappings(Note, data)
         DB.session.commit()
-    return ""
 
 
 def delete_recipe_data(id_):
