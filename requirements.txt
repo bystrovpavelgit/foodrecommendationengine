@@ -29,6 +29,7 @@ flask_sqlalchemy
 libuv
 ninja
 flask-migrate
+scipy
 nltk
 sqlalchemy
 tensorflow
