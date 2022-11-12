@@ -1,4 +1,4 @@
-""" author Pavel Bystrov
+""" Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
     create admin user utility """
 import sys
 from getpass import getpass

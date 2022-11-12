@@ -1,4 +1,5 @@
-""" script to load ratings"""
+""" Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    script to load ratings """
 import csv
 from datetime import date
 import numpy as np

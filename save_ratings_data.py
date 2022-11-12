@@ -1,4 +1,5 @@
-""" script to save ratings for CF model"""
+""" Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    script to save ratings for CF model"""
 import csv
 from webapp import create_app
 from webapp.stat.models import Interactions
