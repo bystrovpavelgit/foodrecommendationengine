@@ -1,4 +1,7 @@
-""" Flask app """
+"""
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    Flask web-app for recipe recommendation
+"""
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -11,8 +14,8 @@ from webapp.recommend.views import blueprint as recommend_blueprint
 
 
 def create_app():
-    """ starting app for Flask object detection site """
-    app = Flask(__name__, static_url_path="/static/", static_folder="/static/")
+    """ main app for recipe recommendation """
+    app = Flask(__name__, static_url_path="/", static_folder="/")
     app.config.from_pyfile("config.py")
     login_manager = LoginManager()
     login_manager.init_app(app)

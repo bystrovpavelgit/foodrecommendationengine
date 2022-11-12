@@ -1,27 +1,94 @@
-""" business logic functionality """
-from bs4 import BeautifulSoup
-import requests
+"""
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    business logic functionality
+"""
+from datetime import date
+import logging
+from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError
+from sqlite3 import IntegrityError
 from webapp.db import DB
 from webapp.stat.models import Note, Author, Interactions
 
 
-def add_rating_for_author(rating, name, recipe_id):
-    """ insert rating for author """
-    author = None
+def find_recipe_names(cuisine):
+    """ find recipe names """
+    result = [""] * 9
+    ids = [-1] * 9
+    if Note.query.filter(Note.cusine == cuisine).count() > 0:
+        notes = Note.query.filter(
+            Note.cusine == cuisine).order_by(Note.id).limit(9)
+        result = [data.name for data in notes]
+        ids = [data.id for data in notes]
+    return result, ids
+
+
+def get_recipe_names_by_cuisine(ids, cuisine):
+    """ find recipe names by cuisine """
+    result = []
+    res_ids = []
+    for data in Note.query.filter(
+            Note.cusine == cuisine).filter(Note.id.in_(ids)).all():
+        result.append(data.name)
+        res_ids.append(data.id)
+    return result, res_ids
+
+
+def get_recipe_names_by_type(ids, type_):
+    """ find recipe names by type """
+    result = []
+    res_ids = []
+    for data in Note.query.filter(
+            Note.typed == type_).filter(Note.id.in_(ids)).all():
+        result.append(data.name)
+        res_ids.append(data.id)
+    return result, res_ids
+
+
+def find_recipe(id_):
+    """ find recipe by id """
+    if Note.query.filter(Note.id == id_).count() > 0:
+        note = Note.query.filter(Note.id == id_).first()
+        return note
+
+
+def insert_or_update_rating(rating, name, recipe_id):
+    """ insert or update rating for author """
     if name:
         author = Author.query.filter(Author.name == name).first()
-    author_id = author.id if author else -1
-    DB.session.add(Interactions(rating=rating, author_id=author_id, recipe_id=recipe_id))
-    DB.session.commit()
-    return True
+        author_id = author.id if author else -1
+        cur_date = date.today()
+        try:
+            if Interactions.query.filter(
+                    Interactions.author_id == author_id and
+                    Interactions.recipe_id == recipe_id).count() == 0:
+                DB.session.add(Interactions(rating=rating,
+                                            author_id=author_id,
+                                            recipe_id=recipe_id,
+                                            created=cur_date))
+                logging.debug(f"insert Interactions: aid:{author_id} rid:{recipe_id} rating:{rating}")
+            else:
+                interact = Interactions.query.filter(
+                    Interactions.author_id == author_id and
+                    Interactions.recipe_id == recipe_id).first()
+                interact.rating = rating
+                interact.created = cur_date
+                logging.debug(f"update Interactions: aid:{author_id} rid:{recipe_id} rating:{rating}")
+            DB.session.commit()
+        except (SQLAlchemyError, IntegrityError, PendingRollbackError) as e:
+            error = str(e.__dict__['orig'])
+            err = f"Exception in insert_or_update_rating: {error} " + \
+                  f"aid:{author_id} rid:{recipe_id} rating:{rating}"
+            logging.debug(err)
+            DB.session.rollback()
 
 
-def find_data_by_cuisine(search, cuisine):
+def find_recipe_id_by_type_and_cuisine(dish_type, cusine):
     """ find recipe by cuisine """
-    tmp = search
-    if Note.query.filter(Note.cusine == cuisine).count() > 0:
-        note = Note.query.filter(Note.cusine == cuisine).first()
-        return note
+    if Note.query.filter(
+            Note.cusine == cusine).filter(Note.typed == dish_type).count() > 0:
+        recipe = Note.query.filter(
+            Note.cusine == cusine).filter(Note.typed == dish_type).first()
+        return recipe.id
 
 
 def insert_recipe_data(data):
@@ -39,31 +106,3 @@ def delete_recipe_data(id_):
     DB.session.delete(note)
     DB.session.commit()
     return True
-
-
-def get_html(url):
-    """ get html function """
-    try:
-        result = requests.get(url)
-        result.raise_for_status()
-        return result.text
-    except(requests.RequestException, ValueError):
-        print("error")
-        return False
-
-
-def get_python_news(url):
-    """ get python news """
-    html = get_html(url)
-    if html:
-        soup = BeautifulSoup(html, "html.parser")
-        all_news = soup.find("ul", class_="list-recent-posts").findAll("li")
-        result_news = []
-        for news in all_news:
-            title = news.find("a").text
-            url = news.find("a")["href"]
-            published = news.find("time").text
-            print(title, url, published)
-            result_news.append((title, url, published))
-        return result_news
-    return False
