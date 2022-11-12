@@ -20,6 +20,6 @@ export FLASK_APP=webapp && export FLASK_ENV=development && export FLASK_DEBUG=1 
 ## Рекомендация блюд на основе Collaborative Filering
 Наиболее популярный рецепт вычисляется по следующей формуле:
 
-![Formula](https://github.com/bystrovpavelgit/foodrecommendationengine/blob/main/img/CF_regression.png?raw=true)
 ![Screenshot](img/CF_regression.png)
+
 ###### End
