@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container">
     <div class="row">
-        <div class="col-4">
+        <div class="col-2">
         </div>
         <div class="col-8">
 			{% with messages = get_flashed_messages() %}
@@ -36,8 +36,12 @@
 						{% endfor %}
 					</div>
 				{% endfor %}
+                <center>
 				{{ form.submit }}
+                </center>
             </form>
+        </div>
+        <div class="col-2">
         </div>
     </div>
 </div>

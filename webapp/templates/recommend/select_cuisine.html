@@ -1,0 +1,35 @@
+{% extends "bootstrap.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+        </div>
+        <div class="col-4">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+				<div class="alert alert-warning" role="alert">
+					{% for message in messages %}
+						{{ message }}<br>
+					{% endfor %}
+				</div>
+				{% endif %}
+			{% endwith %}
+            <form action="{{ url_for('recommend.recommend')}}" method="POST">
+                <select class="form-select form-select-lg mb-3" aria-label="select-lg example" name="cuisine">
+                  <option selected>{{ select }}</option>
+                  <option value="русская">русская</option>
+                  <option value="азиатская">азиатская</option>
+                  <option value="европейская">европейская</option>
+                  <option value="мексиканская">мексиканская</option>
+                  <option value="африканская">африканская</option>
+                </select>
+                <center>
+                <input type="submit" value="OK" name="action_" class="btn btn-primary" />
+                </center>
+            </form>
+        </div>
+        <div class="col-4">
+        </div>
+    </div>
+</div>
+{% endblock %}

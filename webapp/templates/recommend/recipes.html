@@ -1,6 +1,13 @@
-{% extends "bootstrap_album.html" %}
+{% extends "bootstrap.html" %}
 {% block content %}
-	<br>
+  <section class="py-5 text-center container">
+    <div class="row py-lg-5">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">{{ text }}</h1>
+      </div>
+    </div>
+  </section>
+  <br>
 
   <div class="album py-5 bg-light">
     <div class="container">
@@ -12,7 +19,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[0] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 1" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -27,7 +34,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[1] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 2" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -42,7 +49,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[2] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 3" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -58,7 +65,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[3] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 4" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -73,7 +80,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[4] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 5" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -88,7 +95,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[5] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 6" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -104,7 +111,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[6] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 7" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -119,7 +126,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[7] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 8" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
@@ -134,7 +141,7 @@
             <div class="card-body">
               <p class="card-text"> {{ messages[8] }} <br></p>
               <div class="d-flex justify-content-between align-items-center">
-			    <form action="{{ url_for('recommend.recommend') }}" method="POST">
+			    <form action="/recommend/recipes/{{ type_ }}" method="POST">
                     <input type="submit" value="Рецепт 9" name="action_" class="btn btn-primary" />
 			    </form>
                 <small class="text-muted"> </small>
