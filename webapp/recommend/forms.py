@@ -1,12 +1,10 @@
-""" Recommendation forms """
+"""
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    Recommendation forms
+"""
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from wtforms import IntegerField, SubmitField
-
-
-class ViewForm(FlaskForm):
-    """ class ViewForm """
-    submit = SubmitField("view", render_kw={"class": "btn btn-primary"})
 
 
 class VotingForm(FlaskForm):

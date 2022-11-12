@@ -1,4 +1,7 @@
-""" scrapper utility """
+"""
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    scrapper utility
+"""
 import json
 import os
 import time
@@ -6,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests import ReadTimeout, ConnectTimeout, Timeout
 from requests.exceptions import HTTPError
+
 
 def load_eda_ru_urls(html):
     """ extract urls from html page"""
@@ -20,7 +24,7 @@ def load_eda_ru_urls(html):
 
 
 def get_another_photo(soup):
-    """ search other url source inside div tag with itemprop='recipeInstructions'
+    """ search other url source inside div tag with item-prop='recipeInstructions'
     and in meta tag with itemProp=image """
     item = soup.find("div", itemprop="recipeInstructions")
     if item:
@@ -35,6 +39,7 @@ def get_another_photo(soup):
 def get_photo_url(soup):
     """ get photo url source """
     item = soup.find("div", class_="emotion-mrkurn")
+    results = []
     if item:
         results = item.find_all("img")
     if len(results) > 0:

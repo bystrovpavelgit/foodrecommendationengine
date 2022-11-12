@@ -1,6 +1,6 @@
 """
-   author Pavel Bystrov
-   model for internal SQLite
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+   model for python internal SQLite db
 """
 from webapp.db import DB
 

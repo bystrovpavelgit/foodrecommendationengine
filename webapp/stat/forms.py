@@ -6,28 +6,6 @@ from wtforms import Form, FieldList, FormField, IntegerField, SelectField, \
 from wtforms import validators
 
 
-class RecommendByTypeForm(FlaskForm):
-    """ class RecommendForm """
-    search = StringField("Что искать",
-                         validators=[DataRequired()],
-                         render_kw={"class": "form-control"})
-    dish_type = StringField("Тип блюда",
-                            validators=[DataRequired()],
-                            render_kw={"class": "form-control"})
-    submit = SubmitField("порекоммендовать", render_kw={"class": "btn btn-primary"})
-
-
-class RecommendCuisineForm(FlaskForm):
-    """ class RecommendForm """
-    search = StringField("Что искать",
-                         validators=[DataRequired()],
-                         render_kw={"class": "form-control"})
-    cuisine = StringField("Тип кухни",
-                          validators=[DataRequired()],
-                          render_kw={"class": "form-control"})
-    submit = SubmitField("порекоммендовать", render_kw={"class": "btn btn-primary"})
-
-
 class LapForm(Form):
     """ Subform """
     ingredient = StringField('ингредиент',
@@ -55,12 +33,4 @@ class NumberOfIngredientsForm(FlaskForm):
     number = IntegerField("Сколько ингредиентов в рецепте блюда",
                              validators=[DataRequired()],
                              render_kw={"class": "form-control"})
-    submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
-
-
-class VotingForm(FlaskForm):
-    """ class RecommendForm """
-    stars = IntegerField("Оценка",
-                             validators=[DataRequired()],
-                             render_kw={"class": "form-control"})
-    submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
+    submit = SubmitField("OK", render_kw={"class": "btn btn-primary"})

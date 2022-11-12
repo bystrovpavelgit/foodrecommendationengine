@@ -1,4 +1,6 @@
-""" import fasttext
+"""
+    Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
+    nlp utilities
 """
 import csv
 from copy import copy
@@ -109,7 +111,7 @@ def get_random_synonyms(lemmas, indices, syn_map):
 def get_similar_directions(directions_tokenized, syn_map):
     """ get similar directions  """
     result = []
-    for i in range(5):
+    for i in range(3):
         indices = get_3_rand_indices(directions_tokenized, syn_map)
         synonyms = get_random_synonyms(directions_tokenized, indices, syn_map)
         new_directions = copy(directions_tokenized)
@@ -121,7 +123,7 @@ def get_similar_directions(directions_tokenized, syn_map):
 
 def get_text_array(data):
     """ get text array """
-    data = data[1:-1].replace("'", "")
+    data = data.replace("'", "")
     tokens = data.split(",")
     return tokens
 
@@ -152,17 +154,17 @@ def recipe_to_mult_texts(recipe, syn_map, end_token):
     arr = get_text_array(replace_special_chars(recipe.directions.lower()))
     name_tokenized = tokenize(recipe.name.lower()) + [end_token]
     directions_tokenized = lemmatize(tokenize(" ".join(arr)))
-    five_directions = get_similar_directions(directions_tokenized, syn_map)
+    three_directions = get_similar_directions(directions_tokenized, syn_map)
     directions_tokenized = name_tokenized + directions_tokenized
-    five_directions = [name_tokenized + d for d in five_directions]
-    directions = [directions_tokenized] + five_directions
+    three_directions = [name_tokenized + d for d in three_directions]
+    directions = [directions_tokenized] + three_directions
     ingredients = get_text_array(recipe.ingredients.lower().replace(".", ","))
     measures = get_text_array(replace_special_chars(recipe.mera.lower().replace(".", ",")))
     ingredients, measures = remove_duplicates(ingredients, measures)
     arr = [f"{i.strip()} {element.strip()}" for i, element in zip(ingredients, measures)]
     ingredients_tokenized = lemmatize(tokenize(" ".join(arr)))
-    all_ingredients = [ingredients_tokenized] * 6
-    all_types = [(TYPE_MAP[recipe.typed], CUISINES[recipe.cusine])] * 6
+    all_ingredients = [ingredients_tokenized] * 4
+    all_types = [(TYPE_MAP[recipe.typed], CUISINES[recipe.cusine])] * 4
     return directions, all_ingredients, all_types
 
 
