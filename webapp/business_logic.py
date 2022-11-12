@@ -1,53 +1,19 @@
 """ business logic functionality """
-from datetime import date
 from bs4 import BeautifulSoup
-from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError
-from sqlite3 import IntegrityError
+import requests
 from webapp.db import DB
 from webapp.stat.models import Note, Author, Interactions
-from webapp.utils.web_util import get_html
 
 
-def find_recipe_names(cuisine):
-    """ find recipe names """
-    result = [""] * 9
-    ids = [-1] * 9
-    if Note.query.filter(Note.cusine == cuisine).count() > 0:
-        notes = Note.query.filter(Note.cusine == cuisine).order_by(Note.id).limit(9)
-        result = [data.name for data in notes]
-        ids = [data.id for data in notes]
-    return result, ids
-
-
-def find_recipe(id_):
-    """ find recipe by id """
-    if Note.query.filter(Note.id == id_).count() > 0:
-        note = Note.query.filter(Note.id == id_).first()
-        return note
-
-
-def insert_or_update_rating(rating, name, recipe_id):
-    """ insert or update rating for author """
+def add_rating_for_author(rating, name, recipe_id):
+    """ insert rating for author """
+    author = None
     if name:
         author = Author.query.filter(Author.name == name).first()
-        author_id = author.id if author else -1
-        cur_date = date.today()
-        try:
-            DB.session.add(Interactions(rating=rating,
-                                        author_id=author_id,
-                                        recipe_id=recipe_id,
-                                        created=cur_date))
-            print(f"insert {author.id}", rating, cur_date)
-            DB.session.commit()
-        except (SQLAlchemyError, IntegrityError, PendingRollbackError) as e:
-            error = str(e.__dict__['orig'])
-            print(error)
-            DB.session.rollback()
-            interact = Interactions.query.filter(
-                Interactions.author_id == author_id and Interactions.recipe_id == recipe_id).first()
-            interact.rating = rating
-            interact.created = cur_date
-            DB.session.commit()
+    author_id = author.id if author else -1
+    DB.session.add(Interactions(rating=rating, author_id=author_id, recipe_id=recipe_id))
+    DB.session.commit()
+    return True
 
 
 def find_data_by_cuisine(search, cuisine):
@@ -73,6 +39,17 @@ def delete_recipe_data(id_):
     DB.session.delete(note)
     DB.session.commit()
     return True
+
+
+def get_html(url):
+    """ get html function """
+    try:
+        result = requests.get(url)
+        result.raise_for_status()
+        return result.text
+    except(requests.RequestException, ValueError):
+        print("error")
+        return False
 
 
 def get_python_news(url):
