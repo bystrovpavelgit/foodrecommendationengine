@@ -60,7 +60,7 @@ def process_fill_recipe(num):
                  "pic": "",
                  "ingredients": ingredients,
                  "mera": mera,
-                 "directions": f"[{form.directions.data}]",
+                 "directions": f"{form.directions.data}",
                  "cusine": "",
                  "typed": "",
                  "url": "manual"}]
