@@ -1,6 +1,6 @@
 """
     Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
-    blueprint for statistics
+    blueprint for recommendations
 """
 from flask import abort, render_template, Blueprint, request, redirect, \
     url_for, flash
@@ -8,12 +8,13 @@ from flask_login import login_required, current_user
 import logging
 from webapp.business_logic import find_recipe, \
     insert_or_update_rating
-from webapp.utils.recipes_util import find_enough_recommended_recipes
+from webapp.utils.recipes_util import find_enough_recommended_recipes, \
+    calculate_embeddings, to_list
 from webapp.config import RECOMMEND_ACTIONS, COLORS, RECOMMEND_ACT, \
-    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE
-from webapp.utils.nlp_util import str_to_list
+    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, CALC_MODEL
+from webapp.recommend.forms import CalcForm
 
-logging.basicConfig(filename='webapp.log', level=logging.INFO)
+
 blueprint = Blueprint("recommend", __name__, url_prefix="/recommend", static_url_path="/", static_folder="/")
 
 
@@ -133,11 +134,11 @@ def recipe(num):
         return redirect(url_for("index"))
     if rec:
         arr = [rec.name,
-               rec.typed] + [" ".join(str_to_list(rec.directions))]
-        ingr = str_to_list(rec.ingredients)
+               rec.typed] + [" ".join(to_list(rec.directions))]
+        ingr = to_list(rec.ingredients)
         zipped = zip([COLORS[i % 5] for i in range(len(ingr))],
                      ingr,
-                     str_to_list(rec.mera))
+                     to_list(rec.mera))
         return render_template("recommend/show_recipe.html",
                                main_text=RECIPE,
                                num=num,
@@ -146,3 +147,25 @@ def recipe(num):
     logging.error(f"Ошибка: рецепт {num} не найден")
     flash(f"Ошибка: рецепт {num} не найден")
     return redirect(url_for("index"))
+
+
+@blueprint.route("/calculate")
+@login_required
+def calculate():
+    """ show calculate form """
+    form = CalcForm()
+    return render_template("recommend/calculate.html", title=CALC_MODEL, form=form)
+
+
+@blueprint.route("/process_calculate", methods=["POST"])
+@login_required
+def process_calculate():
+    """ process embeddings for CF-model"""
+    form = CalcForm()
+    if form.validate_on_submit():
+        calculate_embeddings()
+        logging.info(f"модель повторно рассчитана")
+        flash("модель повторно рассчитана")
+        return redirect(url_for("index"))
+    flash("Ошибка")
+    return redirect(url_for("recommend.calculate"))

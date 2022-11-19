@@ -4,7 +4,8 @@
 """
 from webapp.business_logic import get_recipe_names_by_cuisine, \
     get_recipe_names_by_type
-from webapp.dl import prepare_embeddings_and_get_top_items
+from webapp.utils.nlp_util import str_to_list
+from webapp.dl import RECOMMEND, prepare_embeddings_and_get_top_items
 
 
 def reorder_ids_by_index(index: list, messages: list, ids: list) -> tuple:
@@ -27,3 +28,13 @@ def find_enough_recommended_recipes(id_, cuisine, dish):
     messages, ids = reorder_ids_by_index(
         ids_, msg, ids)
     return messages, ids
+
+
+def calculate_embeddings():
+    """ method to calculate embeddings """
+    RECOMMEND.train_model_and_get_embeddings()
+
+
+def to_list(text: str) -> list:
+    """ convert to list """
+    return str_to_list(text)

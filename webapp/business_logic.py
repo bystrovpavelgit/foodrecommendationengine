@@ -8,6 +8,13 @@ from sqlalchemy.exc import SQLAlchemyError, PendingRollbackError
 from sqlite3 import IntegrityError
 from webapp.db import DB
 from webapp.stat.models import Note, Author, Interactions
+from webapp.user.models import User
+
+
+def get_user_by_name(name):
+    """  get user by name """
+    user = User.query.filter_by(username=name).first()
+    return user
 
 
 def find_recipe_names(cuisine):

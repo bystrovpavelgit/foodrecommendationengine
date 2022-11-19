@@ -3,13 +3,9 @@
     Recommendation forms
 """
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired
-from wtforms import IntegerField, SubmitField
+from wtforms import SubmitField
 
 
-class VotingForm(FlaskForm):
-    """ class VotingForm """
-    stars = IntegerField("Оценка",
-                         validators=[DataRequired()],
-                         render_kw={"class": "form-control"})
-    submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
+class CalcForm(FlaskForm):
+    """ Calc Form """
+    ok = SubmitField("OK", render_kw={"class": "btn btn-primary"})
