@@ -16,8 +16,11 @@
 			{% endwith %}
 			<form action="{{ url_for('recommend.process_calculate')}}" method="POST">
 				{{ form.hidden_tag() }}
-				Расчет модели может выполняться до 5 минут<br>
-				{{ form.ok }}
+                <center><b>ПЕРЕРАСЧЕТ МОДЕЛИ</b></center>
+                <br>
+				<center>Расчет модели может выполняться до 5 минут</center>
+                <br>
+				<center>{{ form.ok }}</center>
 			</form>
 			</div>
             <div class="col-4">
