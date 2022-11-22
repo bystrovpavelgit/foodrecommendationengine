@@ -242,7 +242,7 @@ class CFRecommender:
                   shuffle=True,
                   verbose=1,
                   validation_data=(self.X_test_array, self.y_test))
-        model.save("models/cf_nnet_2000ep.h5")
+        model.save("models/new_rnn_cuisine.h5")
         self.users_embedding = extract_and_save_embeddings(model)
 
     def find_rating_for_dish(self, user_id, item_id, user_enc, item_enc):
