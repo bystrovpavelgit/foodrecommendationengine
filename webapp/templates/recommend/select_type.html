@@ -14,10 +14,10 @@
 				</div>
 				{% endif %}
 			{% endwith %}
-            <form action="{{ url_for('recommend.recommend_by_type')}}" method="POST">
+            <form action="{{ url_for('recommend.process_recommend_by_type')}}" method="POST">
+                {{ title }}<br>
                 <select class="form-select form-select-lg mb-3" aria-label="select-lg example" name="dish">
-                  <option selected>{{ select }}</option>
-                  <option value="вторые блюда">вторые блюда</option>
+                  <option selected>вторые блюда</option>
                   <option value="десерты">десерты</option>
                   <option value="завтраки">завтраки</option>
                   <option value="закуски">закуски</option>
