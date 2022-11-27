@@ -5,6 +5,7 @@
 from copy import copy
 from functools import reduce
 import pickle
+import logging
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -94,12 +95,16 @@ def insert_users_and_recipes_into_df(df):
 
 def load_users_and_ratings_as_x_y_df(users_csv="data/users_ratings.csv"):
     """ load users and ratings as x, y, dataframe """
-    ratings = pd.read_csv(users_csv)
-    insert_users_and_recipes_into_df(ratings)
-    ratings['rating'] = ratings['rating'].values.astype(np.float32)
-    x = ratings[['user', 'recipe']].values
-    y = ratings['rating'].values
-    return x, y, ratings
+    try:
+        ratings = pd.read_csv(users_csv)
+        insert_users_and_recipes_into_df(ratings)
+        ratings['rating'] = ratings['rating'].values.astype(np.float32)
+        x = ratings[['user', 'recipe']].values
+        y = ratings['rating'].values
+        return x, y, ratings
+    except Exception:
+        logging.error("ошибки в функции load_users_and_ratings_as_x_y_df")
+        return None, None, None
 
 
 def get_train_test_arrays(x_train, x_test):
@@ -111,6 +116,7 @@ def get_train_test_arrays(x_train, x_test):
 
 class EmbeddingLayer:
     """ Embedding Layer """
+
     def __init__(self, n_items, n_factors):
         self.n_items = n_items
         self.n_factors = n_factors
@@ -177,28 +183,34 @@ def find_n_closest(id_, ids, users_dict, embed, n=20):
     encoded_ids = list(map(lambda x: users_dict[x], minus_one))
     vect = embed[0][k][...]
     res = [(i, cosine_sim(vect, embed[0][encoded_ids[i]][...])) for i in range(len(minus_one))]
-    sort = sorted(res, key=lambda x: x[1], reverse=True)[:200]
-    print(minus_one[sort[0][0]], minus_one[sort[1][0]])
+    sort = sorted(res, key=lambda x: x[1], reverse=True)
     sort = sort[:n]
     similars = [elem[1] for elem in sort]
     actuals = [minus_one[elem[0]] for elem in sort]
     return actuals, similars
 
 
-def get_users_items_matrix_and_popularities(ratings):
+def get_users_items_matrix(ratings):
     """ Construct sparse matrix """
-    X = ratings[['user', 'recipe']].values
+    x = ratings[['user', 'recipe']].values
     y = ratings['rating'].values
     n_users = ratings['user'].nunique()
     n_items = ratings['recipe'].nunique()
-    mat = sp.dok_matrix((n_users + 1, n_items + 1), dtype=np.float32)
+    matr = sp.dok_matrix((n_users + 1, n_items + 1), dtype=np.float32)
     for i in range(len(y)):
         if y[i] > 0:
-            mat[X[i][0], X[i][1]] = y[i]
+            matr[x[i][0], x[i][1]] = y[i]
+    return matr
+
+
+def get_items_popularities(ratings):
+    """ get popularity list """
+    x = ratings[['user', 'recipe']].values
+    n_items = ratings['recipe'].nunique()
     popular = np.zeros((n_items,))
-    for i in range(len(y)):
-        popular[X[i][1]] += 1
-    return mat, popular
+    for i in range(x.shape[0]):
+        popular[x[i][1]] += 1
+    return popular
 
 
 def average_rating(k, ratings):
@@ -210,22 +222,43 @@ def average_rating(k, ratings):
 
 class CFRecommender:
     """ Recommender of dishes using collaborative filtration """
+
     def __init__(self, users_csv="data/users_ratings.csv", n_factors=60):
         x, y, ratings = load_users_and_ratings_as_x_y_df(users_csv=users_csv)
+        if ratings is None:
+            print("csv file error")
         self.ratings = ratings
-        X_train, X_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.1, random_state=17)
-        self.X_train_array, self.X_test_array = get_train_test_arrays(X_train, X_test)
+        x_train, x_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.1, random_state=17)
+        self.X_train_array, self.X_test_array = get_train_test_arrays(x_train, x_test)
         self.n_users = ratings['user'].nunique()
         self.n_items = ratings['recipe'].nunique()
         self.n_factors = n_factors
-        self.actual_items = get_actual_items(self.ratings)
+        items = get_actual_items(ratings)
+        self.actual_items = items
+        self.user_dict = get_unique_user_map(ratings,
+                                             get_actual_users(ratings))
+        self.item_dict = get_unique_item_map(ratings, items)
+        self.matr = get_users_items_matrix(ratings)
+        self.popularity = get_items_popularities(ratings)
         self.users_embedding = None
-        self.matr = None
-        self.popularity = None
         self.closest_users = None
         self.similarities = None
-        self.closest_users = None
-        self.similarities = None
+
+    def get_ratings(self):
+        """ вернуть ratings """
+        return self.ratings
+
+    def get_actual_items(self):
+        """ вернуть actual_items """
+        return self.actual_items
+
+    def set_user_dict(self, user_dict):
+        """ установить user_dict """
+        self.user_dict = user_dict
+
+    def set_item_dict(self, item_dict):
+        """ установить item_dict """
+        self.item_dict = item_dict
 
     def get_pretrained_embeddings(self, pickle_file="models/users_embedding.pkl"):
         """ get pretrained embeddings """
@@ -245,17 +278,17 @@ class CFRecommender:
         model.save("models/new_rnn_cuisine.h5")
         self.users_embedding = extract_and_save_embeddings(model)
 
-    def find_rating_for_dish(self, user_id, item_id, user_enc, item_enc):
+    def find_rating_for_dish(self, user_id, item_id):
         """ Вычисление оценки рейтинга по схожим клиентам
             (User based Collaborative Filtering)
             arguments user_id and item_id
         """
-        dish = item_enc[item_id]
-        avg_u = average_rating(user_enc[user_id], self.matr)
+        dish = self.item_dict[item_id]
+        avg_u = average_rating(self.user_dict[user_id], self.matr)
         weighted_sum = 0.
         sum_ = 0.
         for k in range(len(self.closest_users)):
-            j = user_enc[self.closest_users[k]]
+            j = self.user_dict[self.closest_users[k]]
             if self.matr[j, dish] > 0:
                 rate = self.matr[j, dish]
                 avg_v = average_rating(j, self.matr)
@@ -265,30 +298,29 @@ class CFRecommender:
             return int(avg_u + (weighted_sum / sum_))
         return 1
 
-    def find_100_closest_ratings_for_user(self, user_id, user_dict, item_dict):
+    def find_100_closest_ratings_for_user(self, user_id):
         """ find 100 closest ratings for user """
         del self.matr, self.popularity
-        self.matr, self.popularity = get_users_items_matrix_and_popularities(
-            self.ratings)
+        self.matr = get_users_items_matrix(self.ratings)
+        self.popularity = get_items_popularities(self.ratings)
         all_users = get_actual_users(self.ratings)
-        self.closest_users, self.similarities = find_n_closest(user_id,
-                                                               all_users,
-                                                               user_dict,
-                                                               self.users_embedding,
-                                                               n=20)
+        tupl_ = find_n_closest(user_id,
+                               all_users,
+                               self.user_dict,
+                               self.users_embedding,
+                               n=20)
+        self.closest_users = tupl_[0]
+        self.similarities = tupl_[1]
         actual_items = get_actual_items(self.ratings)
         rating_list = [self.find_rating_for_dish(user_id,
-                                                 i,
-                                                 user_dict,
-                                                 item_dict) for i in actual_items]
-        return rating_list
+                                                 i) for i in actual_items]
+        return rating_list[:100]
 
     def find_top_items_for_rating(self, rating_list):
-        """ find top 9 for ratings with rate_value """
+        """ find top 9 items for ratings """
         zipped = zip(rating_list, self.popularity, list(range(len(rating_list))))
         sorted_ratings = sorted(list(zipped), key=lambda x: x[0], reverse=True)
         top_ratings = [(self.actual_items[el[2]], el[0], el[1]) for el in sorted_ratings]
-        print(top_ratings[:10])
         return top_ratings
 
 
@@ -301,14 +333,12 @@ def prepare_embeddings_and_get_top_items(user_id, load_pretrained=True):
     recommender = RECOMMEND
     if not load_pretrained:
         recommender.train_model_and_get_embeddings(epochs=2222)
-    user_dict = get_unique_user_map(recommender.ratings,
-                                    get_actual_users(recommender.ratings))
-    item_dict = get_unique_item_map(recommender.ratings,
-                                    recommender.actual_items)
-    rating_list = recommender.find_100_closest_ratings_for_user(user_id,
-                                                                user_dict,
-                                                                item_dict)
+    ratings = recommender.get_ratings()
+    user_dict = get_unique_user_map(ratings, get_actual_users(ratings))
+    recommender.set_user_dict(user_dict)
+    item_dict = get_unique_item_map(ratings, recommender.get_actual_items())
+    recommender.set_item_dict(item_dict)
+    rating_list = recommender.find_100_closest_ratings_for_user(user_id)
     top_items_with_rating_and_popularity = recommender.find_top_items_for_rating(
         rating_list)
-    print(f"TOP 7: {top_items_with_rating_and_popularity[:8]}")
     return top_items_with_rating_and_popularity

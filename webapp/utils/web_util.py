@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:65.0) Gecko/20100101 Firefox/65.0'
-    }
+}
 
 
 def get_html(link):
@@ -21,7 +21,7 @@ def get_html(link):
         return result.text
     except (HTTPError, ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
         logging.error("ошибка ConnectTimeout или HTTP ошибка в функции get_html")
-    except(requests.RequestException, ValueError):
+    except (requests.RequestException, ValueError):
         logging.error("ошибки RequestException или ValueError в функции get_html")
     return False
 

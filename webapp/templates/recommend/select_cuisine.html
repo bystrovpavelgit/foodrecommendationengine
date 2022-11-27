@@ -14,10 +14,10 @@
 				</div>
 				{% endif %}
 			{% endwith %}
-            <form action="{{ url_for('recommend.recommend')}}" method="POST">
+            <form action="{{ url_for('recommend.process_recommend')}}" method="POST">
+                {{ title }}<br>
                 <select class="form-select form-select-lg mb-3" aria-label="select-lg example" name="cuisine">
-                  <option selected>{{ select }}</option>
-                  <option value="русская">русская</option>
+                  <option selected>русская</option>
                   <option value="азиатская">азиатская</option>
                   <option value="европейская">европейская</option>
                   <option value="мексиканская">мексиканская</option>

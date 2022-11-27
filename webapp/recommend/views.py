@@ -11,11 +11,11 @@ from webapp.business_logic import find_recipe, \
 from webapp.utils.recipes_util import find_enough_recommended_recipes, \
     calculate_embeddings, to_list
 from webapp.config import RECOMMEND_ACTIONS, COLORS, RECOMMEND_ACT, \
-    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, CALC_MODEL
+    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, CALC_MODEL, \
+    RECOMMEND_RECIPES
 from webapp.recommend.forms import CalcForm
 
-
-blueprint = Blueprint("recommend", __name__, url_prefix="/recommend", static_url_path="/", static_folder="/")
+blueprint = Blueprint("recommend", __name__, url_prefix="/recommend")
 
 
 def fill_params(type_):
@@ -38,79 +38,84 @@ def find_index_of_form(form, actions, action):
         return index
     except ValueError:
         logging.error(f"Value Error in find_index_of_form: {form} {actions} {action}")
-        return None
 
 
-def endpoint_template(params, method, type_, valid_list):
-    """ endpoint template для рекоммендации по типу блюда или по кухне
-    параметры:
-        params     - tuple (russian_type, english_type, redirect_url, html)
-                       redirect_url: URL для редиректа в случае успеха
-                       html: путь к html-странице для GET-request
-        method     - GET / POST
-        type_      - form type
-        valid_list - набор корректных значений
-    """
-    title = f"Выбор {params[0]}"
-    if method == "POST":
-        if type_ in valid_list:
-            logging.info(f"{params[1]}{type_}")
-            return redirect(f"{params[1]}{type_}")
-        logging.warning(f"Введен некорректный тип: {type_}")
-        flash(f"Введите корректный тип {params[0]}")
-    return render_template(f"{params[2]}", title=title, select=title)
+def log_and_flash(msg):
+    """ logging """
+    logging.warning(f"Введен некорректный {msg}")
+    flash(f"Введите корректный {msg}")
 
 
-@blueprint.route("/recommend", methods=["GET", "POST"])
+@blueprint.route("/recommend")
 @login_required
 def recommend():
     """ recipe recommendation by cuisine """
-    params = ("кухни", "/recommend/recipes/", "recommend/select_cuisine.html")
-    type_ = request.form.get("cuisine") if request.method == "POST" else ""
-    return endpoint_template(params,
-                             request.method,
-                             type_,
-                             VALID_CUISINE
-                             )
+    return render_template("recommend/select_cuisine.html",
+                           title="Выбор кухни")
 
 
-@blueprint.route("/recommend_by_type", methods=["GET", "POST"])
+@blueprint.route("/recommend", methods=["POST"])
+@login_required
+def process_recommend():
+    """ process recipe recommendation by cuisine """
+    type_ = request.form.get("cuisine")
+    if type_ in VALID_CUISINE:
+        return redirect(f"/recommend/recipes/{type_}")
+    log_and_flash(f"тип кухни: {type_}")
+    return render_template("recommend/select_cuisine.html",
+                           title="Выбор кухни")
+
+
+@blueprint.route("/recommend_by_type")
 @login_required
 def recommend_by_type():
     """ recipe recommendation by type """
-    params = ("типа блюда", "/recommend/recipes/", "recommend/select_type.html")
-    type_ = request.form.get("dish") if request.method == "POST" else ""
-    return endpoint_template(params,
-                             request.method,
-                             type_,
-                             TYPE_MAP.keys()
-                             )
+    return render_template("recommend/select_type.html",
+                           title="Выбор типа блюда")
 
 
-@blueprint.route("/recipes/<string:type_>", methods=["GET", "POST"])
+@blueprint.route("/recommend_by_type", methods=["POST"])
+@login_required
+def process_recommend_by_type():
+    """ process recipe recommendation by type """
+    type_ = request.form.get("dish")
+    if type_ in TYPE_MAP.keys():
+        return redirect(f"/recommend/recipes/{type_}")
+    log_and_flash(f"тип: {type_}")
+    return render_template("recommend/select_type.html",
+                           title="Выбор типа блюда")
+
+
+@blueprint.route("/recipes/<string:type_>")
 @login_required
 def recipes(type_):
     """ recipe recommendation """
-    title = "Dish Recommendation"
     user = current_user
     dish_type, cuisine, text = fill_params(type_)
     messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
     messages = messages[:9]
-    ids = ids[:9]
-    if request.method == "POST":
-        index = find_index_of_form(request.form,
-                                   RECOMMEND_ACTIONS, RECOMMEND_ACT)
-        if index is not None:
-            logging.info(f"user:{user.id} /recommend/recipe/{ids[index]}")
-            return redirect(f"/recommend/recipe/{ids[index]}")
-        flash("Ошибка валидации")
-        return abort(404)
-    print(ids)
     return render_template("recommend/recipes.html",
-                           title=title,
+                           title=RECOMMEND_RECIPES,
                            text=text,
                            messages=messages,
                            type_=type_)
+
+
+@blueprint.route("/recipes/<string:type_>", methods=["POST"])
+@login_required
+def process_recipes(type_):
+    """ process recipe recommendation """
+    user = current_user
+    dish_type, cuisine, text = fill_params(type_)
+    messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    ids = ids[:9]
+    index = find_index_of_form(request.form,
+                               RECOMMEND_ACTIONS, RECOMMEND_ACT)
+    if index is not None:
+        logging.info(f"user:{user.id} /recommend/recipe/{ids[index]}")
+        return redirect(f"/recommend/recipe/{ids[index]}")
+    flash("Ошибка валидации")
+    return abort(404)
 
 
 @blueprint.route('/recipe/<int:num>', methods=["GET", "POST"])
@@ -154,18 +159,19 @@ def recipe(num):
 def calculate():
     """ show calculate form """
     form = CalcForm()
-    return render_template("recommend/calculate.html", title=CALC_MODEL, form=form)
+    return render_template("recommend/calculate.html",
+                           title=CALC_MODEL,
+                           form=form)
 
 
 @blueprint.route("/process_calculate", methods=["POST"])
 @login_required
 def process_calculate():
-    """ process embeddings for CF-model"""
+    """ calculate embeddings for CF-model"""
     form = CalcForm()
     if form.validate_on_submit():
         calculate_embeddings()
-        logging.info(f"модель повторно рассчитана")
         flash("модель повторно рассчитана")
         return redirect(url_for("index"))
-    flash("Ошибка")
+    flash("Ошибка в calculate form")
     return redirect(url_for("recommend.calculate"))

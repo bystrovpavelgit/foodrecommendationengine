@@ -49,7 +49,7 @@ def str_to_list(text: str) -> list:
 
 
 def tokenize(text: str) -> list:
-    """ tokenize """
+    """ tokenize function """
     txt = text.replace(".", " ЕОС ") \
         .replace(";", " ЕОС ") \
         .replace("!", " ЕОС ") \
