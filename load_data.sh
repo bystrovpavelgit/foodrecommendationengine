@@ -5,5 +5,6 @@ unzip yarn-synsets.csv.zip
 cd ../models
 unzip recipes_nlp_data.csv.zip
 cd ..
+python3 scrap_urls.py
 python3 load_ratings.py
 
