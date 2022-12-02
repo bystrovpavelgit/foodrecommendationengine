@@ -29,7 +29,7 @@ def get_another_photo(soup):
     item = soup.find("div", itemprop="recipeInstructions")
     if item:
         results = item.find_all("img", class_="emotion-1vbvoti")
-        if len(results) > 0:
+        if results:
             res = results.pop()
             if 'src' in res.attrs:
                 src = res.attrs["src"]
@@ -39,14 +39,13 @@ def get_another_photo(soup):
 def get_photo_url(soup):
     """ get photo url source """
     item = soup.find("div", class_="emotion-mrkurn")
-    results = []
     if item:
         results = item.find_all("img")
-    if len(results) > 0:
-        res = results.pop(0)
-        if 'src' in res.attrs:
-            src = res.attrs["src"]
-            return src
+        if results:
+            res = results.pop(0)
+            if 'src' in res.attrs:
+                src = res.attrs["src"]
+                return src
     url = get_another_photo(soup)
     return url
 
@@ -56,6 +55,10 @@ def get_ingredients(soup):
     ingrs = soup.find_all("div", class_="emotion-ydhjlb")
     ingredients_list = [i.find_next("span", itemprop="recipeIngredient").text for i in ingrs]
     result = [i.find_next("span", class_="emotion-15im4d2").text for i in ingrs]
+    n = len(ingredients_list)
+    if n > 3 and ingredients_list[0] == ingredients_list[1] and \
+            ingredients_list[0] == ingredients_list[2]:
+        return ingredients_list[2:], result[2:]
     return ingredients_list, result
 
 
@@ -63,7 +66,8 @@ def get_directions(soup):
     """ get_directions function """
     directions = soup.find_all("span", class_="emotion-6kiu05")
     if len(directions) > 0:
-        res = [e.find_next("span", itemprop="text").text.replace("\xa0", " ") for e in directions]
+        res = [e.find_next("span",
+                           itemprop="text").text.replace("\xa0", " ") for e in directions]
         return res
 
 

@@ -9,6 +9,7 @@ import logging
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+from webapp.config import VOCABULARY
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from tensorflow import keras
@@ -33,20 +34,36 @@ CUISINES = {0: "европейская",
             4: "мексиканская"}
 
 
+def load_rnn_model(name="models/new_rnn_cuisine.h5"):
+    """ load rnn model """
+    try:
+        model = keras.models.load_model(name)
+        return model
+    except FileNotFoundError:
+        logging.error(f"No such file or directory {name}")
+
+
+CUISINE_RNN = load_rnn_model(name="models/new_rnn_cuisine.h5")
+DISHTYPE_RNN = load_rnn_model(name="models/new_rnn2_dish_type.h5")
+
+
 def predict_types(recipe):
     """ predict types """
-    with open("models/vocabulary.pkl", "rb") as v_file:
-        vocab = pickle.load(v_file)
+    try:
+        with open(VOCABULARY, "rb") as v_file:
+            vocab = pickle.load(v_file)
+    except FileNotFoundError:
+        logging.error(f"No such file or directory {VOCABULARY}")
     part1, part2 = tokenize_recipe(recipe, "еос")
     dirs = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part1], 0)
     ingredients = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part2], 0)[:100]
     res = dirs + ingredients
 
-    model = keras.models.load_model("models/new_rnn_cuisine.h5")
+    model = CUISINE_RNN
     arr = np.array([res])
     pred = model.predict(arr[..., None])
     cuisine = np.argmax(pred)
-    model = keras.models.load_model("models/new_rnn2_dish_type.h5")
+    model = DISHTYPE_RNN
     arr = np.array([res])
     pred = model.predict(arr[..., None])
     type_pred = np.argmax(pred)
@@ -102,8 +119,8 @@ def load_users_and_ratings_as_x_y_df(users_csv="data/users_ratings.csv"):
         x = ratings[['user', 'recipe']].values
         y = ratings['rating'].values
         return x, y, ratings
-    except Exception:
-        logging.error("ошибки в функции load_users_and_ratings_as_x_y_df")
+    except FileNotFoundError:
+        logging.error(f"ошибка: файл не найден {users_csv}")
         return None, None, None
 
 
@@ -151,13 +168,17 @@ def extract_and_save_embeddings(model):
     w1 = None
     for layer in model.layers:
         num = str(layer.name)[-2:]
-        if isinstance(layer, Embedding):  # (1, 3076, 60)
+        if isinstance(layer, Embedding):
             w1 = layer
             print(f"layer {num}", np.array(w1.get_weights()).shape)
             break
     users_embedding = np.array(w1.get_weights())
-    with open("models/users_embedding.pkl", "wb") as out_file:
-        pickle.dump(users_embedding, out_file)
+    name = "models/users_embedding.pkl"
+    try:
+        with open(name, "wb") as out_file:
+            pickle.dump(users_embedding, out_file)
+    except FileNotFoundError:
+        logging.error(f"No such file or directory {name}")
     return users_embedding
 
 
@@ -314,7 +335,7 @@ class CFRecommender:
         actual_items = get_actual_items(self.ratings)
         rating_list = [self.find_rating_for_dish(user_id,
                                                  i) for i in actual_items]
-        return rating_list[:100]
+        return rating_list[:700]
 
     def find_top_items_for_rating(self, rating_list):
         """ find top 9 items for ratings """
@@ -332,7 +353,7 @@ def prepare_embeddings_and_get_top_items(user_id, load_pretrained=True):
     """ do calculations and return top items with rating = 5 """
     recommender = RECOMMEND
     if not load_pretrained:
-        recommender.train_model_and_get_embeddings(epochs=2222)
+        recommender.train_model_and_get_embeddings(epochs=2000)
     ratings = recommender.get_ratings()
     user_dict = get_unique_user_map(ratings, get_actual_users(ratings))
     recommender.set_user_dict(user_dict)

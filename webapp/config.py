@@ -12,7 +12,7 @@ SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir,
                                                       "..",
                                                       "webapp.db")
 SQLALCHEMY_TRACK_MODIFICATIONS = True
-SECRET_KEY = "QWEWQYUhj342678gvmjhxckbdvkjbsabc"
+SECRET_KEY = "QWEWQYUhj342678gvmjhxckbdvkjbscde"
 REMEMBER_COOKIE_DURATION = timedelta(days=7)
 COLORS = ["table-primary", "table-secondary", "table-info", "table-light",
           "table-success"]
@@ -35,5 +35,6 @@ FILL_RECIPE = "Заполните Рецепт"
 INGREDIENTS_NUM = "Количество Ингредиентов"
 RECIPE = "Рецепт"
 CALC_MODEL = "Обновление модели"
+VOCABULARY = "models/vocabulary.pkl"
 
 

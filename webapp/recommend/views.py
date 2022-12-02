@@ -2,12 +2,12 @@
     Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
     blueprint for recommendations
 """
-from flask import abort, render_template, Blueprint, request, redirect, \
+from flask import render_template, Blueprint, request, redirect, \
     url_for, flash
 from flask_login import login_required, current_user
 import logging
 from webapp.business_logic import find_recipe, \
-    insert_or_update_rating
+    insert_or_update_rating, save_users_ratings
 from webapp.utils.recipes_util import find_enough_recommended_recipes, \
     calculate_embeddings, to_list
 from webapp.config import RECOMMEND_ACTIONS, COLORS, RECOMMEND_ACT, \
@@ -111,32 +111,19 @@ def process_recipes(type_):
     ids = ids[:9]
     index = find_index_of_form(request.form,
                                RECOMMEND_ACTIONS, RECOMMEND_ACT)
-    if index is not None:
-        logging.info(f"user:{user.id} /recommend/recipe/{ids[index]}")
-        return redirect(f"/recommend/recipe/{ids[index]}")
+    if index is not None and len(ids) > index:
+        if ids[index] >= 0:
+            logging.info(f"user:{user.id} /recommend/recipe/{ids[index]}")
+            return redirect(f"/recommend/recipe/{ids[index]}")
     flash("Ошибка валидации")
-    return abort(404)
+    return redirect(url_for("index"))
 
 
-@blueprint.route('/recipe/<int:num>', methods=["GET", "POST"])
+@blueprint.route('/recipe/<int:num>', methods=["GET"])
 @login_required
 def recipe(num):
     """ show simple recipe with ingedients table """
     rec = find_recipe(num)
-    if request.method == "POST":
-        if rec:
-            index = find_index_of_form(request.form,
-                                       RATE_ACTIONS,
-                                       RATE_ACT)
-            if index is not None:
-                index += 1
-                user = current_user
-                insert_or_update_rating(int(index), user.username, int(num))
-                flash(f"Данные сохранены")
-                logging.info(f"user:{user.id} /recommend/recipe/{num}")
-                return redirect(f"/recommend/recipe/{num}")
-        flash("Ошибка валидации или Ошибка поиска рецепта")
-        return redirect(url_for("index"))
     if rec:
         arr = [rec.name,
                rec.typed] + [" ".join(to_list(rec.directions))]
@@ -151,6 +138,30 @@ def recipe(num):
                                items=zipped)
     logging.error(f"Ошибка: рецепт {num} не найден")
     flash(f"Ошибка: рецепт {num} не найден")
+    return redirect(url_for("index"))
+
+
+@blueprint.route('/recipe/<int:num>', methods=["POST"])
+@login_required
+def process_recipe(num):
+    """ show simple recipe with ingedients table """
+    rec = find_recipe(num)
+    if rec:
+        index = find_index_of_form(request.form,
+                                   RATE_ACTIONS,
+                                   RATE_ACT)
+        if index is not None:
+            index += 1
+            user = current_user
+            insert_or_update_rating(int(index), user.username, int(num))
+            flash(f"Данные сохранены")
+            logging.info(f"user:{user.id} /recommend/recipe/{num}")
+            return redirect(f"/recommend/recipe/{num}")
+        else:
+            msg = "Ошибка поиска рецепта"
+    else:
+        msg = "Ошибка валидации рецепта"
+    flash(msg)
     return redirect(url_for("index"))
 
 
@@ -170,6 +181,7 @@ def process_calculate():
     """ calculate embeddings for CF-model"""
     form = CalcForm()
     if form.validate_on_submit():
+        save_users_ratings(file_name="data/users_ratings.csv")
         calculate_embeddings()
         flash("модель повторно рассчитана")
         return redirect(url_for("index"))
