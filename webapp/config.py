@@ -34,7 +34,7 @@ RECOMMEND_RECIPES = "Рекомендованные Рецепты"
 FILL_RECIPE = "Заполните Рецепт"
 INGREDIENTS_NUM = "Количество Ингредиентов"
 RECIPE = "Рецепт"
-CALC_MODEL = "Обновление модели"
+CALC_MODEL = "Обновление CF-модели"
 VOCABULARY = "models/vocabulary.pkl"
-
-
+USER_BASED = "user"
+ITEM_BASED = "item"

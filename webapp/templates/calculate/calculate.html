@@ -14,7 +14,7 @@
 				</div>
 				{% endif %}
 			{% endwith %}
-			<form action="{{ url_for('recommend.process_calculate')}}" method="POST">
+			<form action="{{ url_for('calculate.process_calculate')}}" method="POST">
 				{{ form.hidden_tag() }}
                 <center><b>ПЕРЕРАСЧЕТ МОДЕЛИ</b></center>
                 <br>
