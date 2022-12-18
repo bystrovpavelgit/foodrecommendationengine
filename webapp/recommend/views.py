@@ -12,7 +12,8 @@ from webapp.utils.recipes_util import find_enough_recommended_recipes, \
     to_list
 from webapp.config import RECOMMEND_ACTIONS, COLORS, RECOMMEND_ACT, \
     RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, \
-    RECOMMEND_RECIPES, USER_BASED, ITEM_BASED
+    RECOMMEND_RECIPES, USER_BASED, ITEM_BASED, \
+    USER_BASED_RECOMMENDATION, ITEM_BASED_RECOMMENDATION
 
 blueprint = Blueprint("recommend", __name__, url_prefix="/recommend")
 
@@ -69,8 +70,8 @@ def process_recommend():
 @login_required
 def recommend_by_type():
     """ recipe recommendation by type """
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+    return render_template("recommend/recommend_by_type_user_based.html",
+                           title=USER_BASED_RECOMMENDATION)
 
 
 @blueprint.route("/recommend_by_type", methods=["POST"])
@@ -81,8 +82,8 @@ def process_recommend_by_type():
     if type_ in TYPE_MAP.keys():
         return redirect(f"/recommend/recipes/{type_}/{USER_BASED}")
     log_and_flash(f"тип: {type_} (user based filtration)")
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+    return render_template("recommend/recommend_by_type_user_based.html",
+                           title=USER_BASED_RECOMMENDATION)
 
 
 @blueprint.route("/recipes/<string:type_>/<string:filtering>")
@@ -171,21 +172,21 @@ def process_recipe(num):
     return redirect(url_for("index"))
 
 
-@blueprint.route("/item_recommend_by_type")
+@blueprint.route("/recommend_by_type_item_based")
 @login_required
-def item_based_recommend_by_type():
+def recommend_by_type_item_based():
     """ recipe recommendation by type """
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+    return render_template("recommend/recommend_by_type_item_based.html",
+                           title=ITEM_BASED_RECOMMENDATION)
 
 
-@blueprint.route("/item_recommend_by_type", methods=["POST"])
+@blueprint.route("/recommend_by_type_item_based", methods=["POST"])
 @login_required
-def item_based_process_recommend_by_type():
+def process_recommend_by_type_item_based():
     """ process recipe recommendation by type """
     type_ = request.form.get("dish")
     if type_ in TYPE_MAP.keys():
         return redirect(f"/recommend/recipes/{type_}/{ITEM_BASED}")
     log_and_flash(f"тип: {type_} (item based filtration)")
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+    return render_template("recommend/recommend_by_type_item_based.html",
+                           title=ITEM_BASED_RECOMMENDATION)

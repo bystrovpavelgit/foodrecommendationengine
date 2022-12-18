@@ -1,0 +1,37 @@
+{% extends "bootstrap.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+        </div>
+        <div class="col-4">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+				<div class="alert alert-warning" role="alert">
+					{% for message in messages %}
+						{{ message }}<br>
+					{% endfor %}
+				</div>
+				{% endif %}
+			{% endwith %}
+            <form action="{{ url_for('recommend.process_recommend_by_type_item_based')}}" method="POST">
+                {{ title }}<br>
+                <select class="form-select form-select-lg mb-3" aria-label="select-lg example" name="dish">
+                  <option selected>вторые блюда</option>
+                  <option value="десерты">десерты</option>
+                  <option value="завтраки">завтраки</option>
+                  <option value="закуски">закуски</option>
+                  <option value="салаты">салаты</option>
+                  <option value="соусы">соусы</option>
+                  <option value="супы и первые блюда">супы и первые блюда</option>
+                </select>
+                <center>
+                <input type="submit" value="OK" name="action_" class="btn btn-primary" />
+                </center>
+            </form>
+        </div>
+        <div class="col-4">
+        </div>
+    </div>
+</div>
+{% endblock %}
