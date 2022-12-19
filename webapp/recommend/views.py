@@ -7,13 +7,13 @@ from flask import render_template, Blueprint, request, redirect, \
 from flask_login import login_required, current_user
 import logging
 from webapp.business_logic import find_recipe, \
-    insert_or_update_rating, save_users_ratings
+    insert_or_update_rating
 from webapp.utils.recipes_util import find_enough_recommended_recipes, \
-    calculate_embeddings, to_list
+    to_list
 from webapp.config import RECOMMEND_ACTIONS, COLORS, RECOMMEND_ACT, \
-    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, CALC_MODEL, \
-    RECOMMEND_RECIPES
-from webapp.recommend.forms import CalcForm
+    RATE_ACT, RATE_ACTIONS, VALID_CUISINE, TYPE_MAP, RECIPE, \
+    RECOMMEND_RECIPES, USER_BASED, ITEM_BASED, \
+    USER_BASED_RECOMMENDATION, ITEM_BASED_RECOMMENDATION
 
 blueprint = Blueprint("recommend", __name__, url_prefix="/recommend")
 
@@ -60,7 +60,7 @@ def process_recommend():
     """ process recipe recommendation by cuisine """
     type_ = request.form.get("cuisine")
     if type_ in VALID_CUISINE:
-        return redirect(f"/recommend/recipes/{type_}")
+        return redirect(f"/recommend/recipes/{type_}/{USER_BASED}")
     log_and_flash(f"тип кухни: {type_}")
     return render_template("recommend/select_cuisine.html",
                            title="Выбор кухни")
@@ -70,8 +70,8 @@ def process_recommend():
 @login_required
 def recommend_by_type():
     """ recipe recommendation by type """
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+    return render_template("recommend/recommend_by_type_user_based.html",
+                           title=USER_BASED_RECOMMENDATION)
 
 
 @blueprint.route("/recommend_by_type", methods=["POST"])
@@ -80,15 +80,15 @@ def process_recommend_by_type():
     """ process recipe recommendation by type """
     type_ = request.form.get("dish")
     if type_ in TYPE_MAP.keys():
-        return redirect(f"/recommend/recipes/{type_}")
-    log_and_flash(f"тип: {type_}")
-    return render_template("recommend/select_type.html",
-                           title="Выбор типа блюда")
+        return redirect(f"/recommend/recipes/{type_}/{USER_BASED}")
+    log_and_flash(f"тип: {type_} (user based filtration)")
+    return render_template("recommend/recommend_by_type_user_based.html",
+                           title=USER_BASED_RECOMMENDATION)
 
 
-@blueprint.route("/recipes/<string:type_>")
+@blueprint.route("/recipes/<string:type_>/<string:filtering>")
 @login_required
-def recipes(type_):
+def recipes(type_, filtering):
     """ recipe recommendation """
     user = current_user
     dish_type, cuisine, text = fill_params(type_)
@@ -98,16 +98,23 @@ def recipes(type_):
                            title=RECOMMEND_RECIPES,
                            text=text,
                            messages=messages,
-                           type_=type_)
+                           type_=type_,
+                           filtering=filtering)
 
 
-@blueprint.route("/recipes/<string:type_>", methods=["POST"])
+@blueprint.route("/recipes/<string:type_>/<string:filtering>", methods=["POST"])
 @login_required
-def process_recipes(type_):
+def process_recipes(type_, filtering):
     """ process recipe recommendation """
     user = current_user
     dish_type, cuisine, text = fill_params(type_)
-    messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    if filtering == USER_BASED:
+        messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    elif filtering == ITEM_BASED:
+        messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    else:
+        flash(f"Неправильный тип фильтрации {filtering}")
+        return redirect(url_for("index"))
     ids = ids[:9]
     index = find_index_of_form(request.form,
                                RECOMMEND_ACTIONS, RECOMMEND_ACT)
@@ -165,25 +172,21 @@ def process_recipe(num):
     return redirect(url_for("index"))
 
 
-@blueprint.route("/calculate")
+@blueprint.route("/recommend_by_type_item_based")
 @login_required
-def calculate():
-    """ show calculate form """
-    form = CalcForm()
-    return render_template("recommend/calculate.html",
-                           title=CALC_MODEL,
-                           form=form)
+def recommend_by_type_item_based():
+    """ recipe recommendation by type """
+    return render_template("recommend/recommend_by_type_item_based.html",
+                           title=ITEM_BASED_RECOMMENDATION)
 
 
-@blueprint.route("/process_calculate", methods=["POST"])
+@blueprint.route("/recommend_by_type_item_based", methods=["POST"])
 @login_required
-def process_calculate():
-    """ calculate embeddings for CF-model"""
-    form = CalcForm()
-    if form.validate_on_submit():
-        save_users_ratings(file_name="data/users_ratings.csv")
-        calculate_embeddings()
-        flash("модель повторно рассчитана")
-        return redirect(url_for("index"))
-    flash("Ошибка в calculate form")
-    return redirect(url_for("recommend.calculate"))
+def process_recommend_by_type_item_based():
+    """ process recipe recommendation by type """
+    type_ = request.form.get("dish")
+    if type_ in TYPE_MAP.keys():
+        return redirect(f"/recommend/recipes/{type_}/{ITEM_BASED}")
+    log_and_flash(f"тип: {type_} (item based filtration)")
+    return render_template("recommend/recommend_by_type_item_based.html",
+                           title=ITEM_BASED_RECOMMENDATION)

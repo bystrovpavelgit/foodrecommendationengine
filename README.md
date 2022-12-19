@@ -27,4 +27,7 @@ export FLASK_APP=webapp && export FLASK_ENV=development && export FLASK_DEBUG=1 
 
 ![Screenshot](img/CF_regression.png)
 
+## Пример найденных рецептов на основе Collaborative Filtering
+
+![Screenshot](img/Recepty.png)
 ## End
