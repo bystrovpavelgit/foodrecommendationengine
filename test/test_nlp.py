@@ -1,6 +1,5 @@
 """ nlp tests """
 import json
-from nltk.corpus import stopwords
 from webapp.utils.nlp_util import replace_special_chars, remove_stopwords, get_text_array,\
     lemmatize, tokenize, str_to_list
 
@@ -52,6 +51,14 @@ def test_str_to_list():
 
 def test_tokenize():
     """ testing tokenize function """
+    txt = tokenize("cc , dd")
+
+    assert len(txt) == 3
+    assert txt[0] == "cc"
+    assert txt[2] == "dd"
+
+def test_truncate_or_pad():
+    """ testing truncate or pad """
     txt = tokenize("cc , dd")
 
     assert len(txt) == 3

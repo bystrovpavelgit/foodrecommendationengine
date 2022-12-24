@@ -5,7 +5,7 @@
 from flask import render_template, flash, redirect, url_for, Blueprint
 from flask_login import login_user, logout_user, current_user
 from webapp.user.forms import LoginForm
-from webapp.user.models import User
+from webapp.business_logic import get_user_by_name
 
 blueprint = Blueprint("user", __name__, url_prefix="/user")
 
@@ -32,7 +32,7 @@ def process_login():
     """ process login endpoint """
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = get_user_by_name(form.username.data)
         if user and user.check_password(form.password.data):
             login_user(user)
             flash("Вы вошли на сайт")

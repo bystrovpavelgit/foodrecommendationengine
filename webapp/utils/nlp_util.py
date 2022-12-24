@@ -137,15 +137,15 @@ def remove_duplicates(data, mera):
 
 
 def pad(arr, padding, max_len=MAX_LEN):
-    """ pad to 400 words"""
-    result = arr + ([padding] * (max_len - len(arr)))
+    """ pad to MAX_LEN words"""
+    result = arr + ([padding] * max(max_len - len(arr), 0))
     return result
 
 
 def truncate_or_pad(arr, padding, max_len=MAX_LEN):
     """ truncate or pad array """
     if len(arr) < max_len:
-        return pad(arr, padding)
+        return pad(arr, padding, max_len=max_len)
     return arr[:max_len]
 
 

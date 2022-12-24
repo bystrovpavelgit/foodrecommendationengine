@@ -1,7 +1,7 @@
 """ юнит-тесты для Recommender system """
 import unittest
 from webapp.dl import CFRecommender, get_unique_user_map, get_actual_users, \
-    get_unique_item_map, find_n_closest, get_users_items_matrix, \
+    get_unique_item_map, find_n_closest_users, get_users_items_matrix, \
     get_items_popularities
 
 
@@ -23,7 +23,7 @@ class TestRecommender(unittest.TestCase):
                                         self.recommender.get_actual_items())
         self.recommender.set_item_dict(item_dict)
         all_users = get_actual_users(ratings)
-        tupl_ = find_n_closest(2,
+        tupl_ = find_n_closest_users(2,
                                all_users,
                                user_dict,
                                embed,
@@ -34,12 +34,6 @@ class TestRecommender(unittest.TestCase):
             self.recommender.get_ratings())
         self.recommender.popularity = get_items_popularities(
             self.recommender.get_ratings())
-
-    def test_sum(self):
-        """ summation юнит-тест """
-        print("юнит-тест summation")
-        self.assertEqual(sum([2, 7]), 9, "равен 9")
-        self.assertEqual(sum([2, 7, 9]), 18, "равен 18")
 
     def test_get_pretrained_embeddings(self):
         """ get_pretrained_embeddings юнит-тест """

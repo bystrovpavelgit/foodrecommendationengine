@@ -196,7 +196,7 @@ def cosine_sim(v1, v2, eps1=1e-5, eps2=1e-5):
     return res
 
 
-def find_n_closest(id_, ids, users_dict, embed, n=20):
+def find_n_closest_users(id_, ids, users_dict, embed, n=20):
     """ find the N-nearest vectors """
     minus_one = copy(ids)
     minus_one.remove(id_)
@@ -204,6 +204,21 @@ def find_n_closest(id_, ids, users_dict, embed, n=20):
     encoded_ids = list(map(lambda x: users_dict[x], minus_one))
     vect = embed[0][k][...]
     res = [(i, cosine_sim(vect, embed[0][encoded_ids[i]][...])) for i in range(len(minus_one))]
+    sort = sorted(res, key=lambda x: x[1], reverse=True)
+    sort = sort[:n]
+    similars = [elem[1] for elem in sort]
+    actuals = [minus_one[elem[0]] for elem in sort]
+    return actuals, similars
+
+
+def find_n_closest_items(id_, item_ids, items_dict, items_embed, n=100):
+    """ find the N-nearest vectors """
+    minus_one = copy(item_ids)
+    minus_one.remove(id_)
+    k = items_dict[id_]
+    encoded_ids = list(map(lambda x: items_dict[x], minus_one))
+    vect = items_embed[0][k][...]
+    res = [(i, cosine_sim(vect, items_embed[0][encoded_ids[i]][...])) for i in range(len(minus_one))]
     sort = sorted(res, key=lambda x: x[1], reverse=True)
     sort = sort[:n]
     similars = [elem[1] for elem in sort]
@@ -263,6 +278,7 @@ class CFRecommender:
         self.popularity = get_items_popularities(ratings)
         self.users_embedding = None
         self.closest_users = None
+        self.closest_items = None
         self.similarities = None
 
     def get_ratings(self):
@@ -319,19 +335,39 @@ class CFRecommender:
             return int(avg_u + (weighted_sum / sum_))
         return 1
 
+    def find_item_based_rating_for_dish(self, user_id, item_id):
+        """ Вычисление оценки рейтинга по схожим клиентам
+            (User based Collaborative Filtering)
+            arguments user_id and item_id
+        """
+        dish = self.item_dict[item_id]
+        avg_u = average_rating(self.user_dict[user_id], self.matr)
+        weighted_sum = 0.
+        sum_ = 0.
+        for k in range(len(self.closest_users)):
+            j = self.user_dict[self.closest_users[k]]
+            if self.matr[j, dish] > 0:
+                rate = self.matr[j, dish]
+                avg_v = average_rating(j, self.matr)
+                weighted_sum += self.similarities[k] * (rate - avg_v)
+                sum_ += self.similarities[k]
+        if sum_ > 0:
+            return int(avg_u + (weighted_sum / sum_))
+        return 1
+
     def find_100_closest_ratings_for_user(self, user_id):
         """ find 100 closest ratings for user """
         del self.matr, self.popularity
         self.matr = get_users_items_matrix(self.ratings)
         self.popularity = get_items_popularities(self.ratings)
         all_users = get_actual_users(self.ratings)
-        tupl_ = find_n_closest(user_id,
-                               all_users,
-                               self.user_dict,
-                               self.users_embedding,
-                               n=20)
-        self.closest_users = tupl_[0]
-        self.similarities = tupl_[1]
+        tuple_ = find_n_closest_users(user_id,
+                                      all_users,
+                                      self.user_dict,
+                                      self.users_embedding,
+                                      n=20)
+        self.closest_users = tuple_[0]
+        self.similarities = tuple_[1]
         actual_items = get_actual_items(self.ratings)
         rating_list = [self.find_rating_for_dish(user_id,
                                                  i) for i in actual_items]
