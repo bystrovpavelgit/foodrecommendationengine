@@ -1,6 +1,7 @@
 """ юнит-тесты для NLP """
 import unittest
-from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad
+from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad, \
+    get_3_rand_indices
 
 
 class TestRecommender(unittest.TestCase):
@@ -35,7 +36,7 @@ class TestRecommender(unittest.TestCase):
         """ юнит-тест для pad """
         array = list(range(300))
 
-        res = truncate_or_pad(array, 0, max_len=self.max_len)
+        res = pad(array, 0, max_len=self.max_len)
 
         self.assertIsNotNone(res, "не пустой")
         self.assertEqual(res[:300], list(range(300)), "result size > 300")
@@ -49,3 +50,17 @@ class TestRecommender(unittest.TestCase):
 
         self.assertIsNotNone(result, "не пустой")
         self.assertEqual(result, ["0", "1", "2", "3", "4"], "result size == 5")
+
+    def test_get_3_rand_indices(self):
+        """ test get_3_rand_indices """
+        words = ["aa", "aaa", "aaaa"]
+        syn_map = {"aa": 1, "aaa": 2, "aaaa": 3}
+
+        indices = get_3_rand_indices(words, syn_map)
+        result = [words[i] for i in indices]
+
+        self.assertIsNotNone(indices, "не пустой")
+        self.assertIsNotNone(result, "не пустой")
+        self.assertTrue("aa" in result, "aa")
+        self.assertTrue("aaa" in result, "aaa")
+        self.assertTrue("aaaa" in result, "aaaa")
