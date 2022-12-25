@@ -1,5 +1,6 @@
+""" юнит-тесты для NLP """
 import unittest
-from webapp.utils.nlp_util import truncate_or_pad
+from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad
 
 
 class TestRecommender(unittest.TestCase):
@@ -19,9 +20,32 @@ class TestRecommender(unittest.TestCase):
     def test_truncate_or_pad(self):
         """ юнит-тест для truncate_or_pad """
         array = list(range(400))
+        array2 = list(range(600))
+
+        res = truncate_or_pad(array, 0, max_len=self.max_len)
+        res2 = truncate_or_pad(array2, 0, max_len=self.max_len)
+
+        self.assertIsNotNone(res, "не пустой")
+        self.assertIsNotNone(res2, "не пустой")
+        self.assertEqual(res[:400], list(range(400)), "result size > 400")
+        self.assertEqual(res[400:], [0]*100, "добавлено 100 нулей к array")
+        self.assertEqual(res2, list(range(500)), "result2 size == 500")
+
+    def test_get_array(self):
+        """ юнит-тест для pad """
+        array = list(range(300))
 
         res = truncate_or_pad(array, 0, max_len=self.max_len)
 
-        self.assertIsNotNone(res, "array не пустой")
-        self.assertEqual(res[:400], list(range(400)), "array size > 400")
-        self.assertEqual(res[400:], [0]*100, "добавлено 100 нулей к array")
+        self.assertIsNotNone(res, "не пустой")
+        self.assertEqual(res[:300], list(range(300)), "result size > 300")
+        self.assertEqual(res[300:], [0]*200, "добавлено 200 нулей к array")
+
+    def test_get_text_array(self):
+        """ юнит-тест для get_text_array """
+        data = "'0,1,2,3,4'"
+
+        result = get_text_array(data)
+
+        self.assertIsNotNone(result, "не пустой")
+        self.assertEqual(result, ["0", "1", "2", "3", "4"], "result size == 5")

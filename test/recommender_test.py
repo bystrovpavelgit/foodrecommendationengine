@@ -24,10 +24,10 @@ class TestRecommender(unittest.TestCase):
         self.recommender.set_item_dict(item_dict)
         all_users = get_actual_users(ratings)
         tupl_ = find_n_closest_users(2,
-                               all_users,
-                               user_dict,
-                               embed,
-                               n=20)
+                                     all_users,
+                                     user_dict,
+                                     embed,
+                                     n=20)
         self.recommender.closest_users = tupl_[0]
         self.recommender.similarities = tupl_[1]
         self.recommender.matr = get_users_items_matrix(
@@ -76,5 +76,4 @@ class TestRecommender(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    """ unittest """
     unittest.main()

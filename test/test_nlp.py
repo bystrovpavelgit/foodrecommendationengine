@@ -57,6 +57,7 @@ def test_tokenize():
     assert txt[0] == "cc"
     assert txt[2] == "dd"
 
+
 def test_truncate_or_pad():
     """ testing truncate or pad """
     txt = tokenize("cc , dd")
