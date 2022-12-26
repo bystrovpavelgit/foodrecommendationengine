@@ -1,7 +1,7 @@
 """ юнит-тесты для NLP """
 import unittest
 from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad, \
-    get_3_rand_indices
+    get_3_rand_indices, lemmatize, remove_stopwords
 
 
 class TestRecommender(unittest.TestCase):
@@ -64,3 +64,23 @@ class TestRecommender(unittest.TestCase):
         self.assertTrue("aa" in result, "aa")
         self.assertTrue("aaa" in result, "aaa")
         self.assertTrue("aaaa" in result, "aaaa")
+
+    # process_synsets
+    def test_lemmatize(self):
+        """ test lemmatize """
+        array = ["роза", "упала"]
+
+        result = lemmatize(array)
+
+        self.assertIsNotNone(result, "не пустой")
+        self.assertEqual(result[0], "роза", "==")
+        self.assertEqual(result[1], "упасть", "==")
+
+    def test_remove_stopwords(self):
+        """ test remove_stopwords """
+        array = ["а", "роза", "и", "упала"]
+
+        result = remove_stopwords(array)
+
+        self.assertIsNotNone(result, "не пустой")
+        self.assertEqual(result, "роза упала", "==")
