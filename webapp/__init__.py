@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from webapp.db import DB
 from webapp.user.models import User
 from webapp.stat.models import Recipe
+from webapp.calculate.views import blueprint as calc_blueprint
 from webapp.user.views import blueprint as user_blueprint
 from webapp.stat.views import blueprint as stat_blueprint
 from webapp.recommend.views import blueprint as recommend_blueprint
@@ -24,6 +25,7 @@ def create_app():
     app.register_blueprint(user_blueprint)
     app.register_blueprint(stat_blueprint)
     app.register_blueprint(recommend_blueprint)
+    app.register_blueprint(calc_blueprint)
 
     migrate = Migrate(app, DB)
 
