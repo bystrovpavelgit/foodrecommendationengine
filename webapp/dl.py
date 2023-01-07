@@ -189,9 +189,9 @@ def l2_norm(vect):
     return res
 
 
-def cosine_sim(v1, v2, eps1=1e-5, eps2=1e-5):
+def cosine_sim(v1, v2, eps=1e-5):
     """ cosine similarity """
-    div = (l2_norm(v1) + eps1) * (l2_norm(v2) + eps2)
+    div = (l2_norm(v1) + eps) * (l2_norm(v2) + eps)
     res = np.dot(v1, v2) / div
     return res
 

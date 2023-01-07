@@ -11,13 +11,6 @@ class TestRecommender(unittest.TestCase):
         """ Инит TestRecommender """
         self.max_len = 500
 
-    def test_sum(self):
-        """ summation юнит-тест """
-        print("юнит-тест summation")
-        self.assertEqual(sum([2, 7]), 9, "равен 9")
-        self.assertEqual(sum([2, 7, 9]), 18, "равен 18")
-        self.assertEqual(sum([6, 1]), 7, "равен 7")
-
     def test_truncate_or_pad(self):
         """ юнит-тест для truncate_or_pad """
         array = list(range(400))
@@ -84,3 +77,7 @@ class TestRecommender(unittest.TestCase):
 
         self.assertIsNotNone(result, "не пустой")
         self.assertEqual(result, "роза упала", "==")
+
+
+if __name__ == "__main__":
+    unittest.main()
