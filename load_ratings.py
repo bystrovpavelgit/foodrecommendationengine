@@ -11,7 +11,7 @@ def process_authors_from_file(name="data/authors.csv"):
     """ process authors from file """
     res = []
     try:
-        with open(name, "r") as f:
+        with open(name, "r", encoding="utf-8") as f:
             fields = ['user_id', 'name']
             rows = csv.DictReader(f, fields, delimiter=',')
             res = [{"id": int(row["user_id"]), "name": row["name"]} for row in
@@ -25,7 +25,7 @@ def process_authors_from_file(name="data/authors.csv"):
 def process_recipe_ratings_from_file(name="data/recipe_ratings.csv"):
     """ process recipe ratings from file """
     try:
-        with open(name, "r") as f:
+        with open(name, "r", encoding="utf-8") as f:
             fields = ['user_id', 'recipe_id', 'rating']
             rows = csv.DictReader(f, fields, delimiter=',')
             res = [{"author_id": int(row["user_id"]),

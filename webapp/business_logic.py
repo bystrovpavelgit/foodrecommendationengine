@@ -15,7 +15,7 @@ from webapp.user.models import User
 def save_users_ratings(file_name="data/users_ratings.csv"):
     """ save ratings to users_ratings.csv """
     try:
-        with open(file_name, "w") as f:
+        with open(file_name, "w", encoding="utf-8") as f:
             fields = ["userId", "rating", "recipeId"]
             writer = csv.DictWriter(f, fields, delimiter=',')
             writer.writeheader()

@@ -66,6 +66,6 @@ if __name__ == "__main__":
         counts = nltk.FreqDist(continuous_text).most_common(22000)
         vocab = {x[0]: (n + 1) for n, x in enumerate(counts)}
         # save vocabulary
-        with open("models/vocabulary.pkl", "wb") as f:
+        with open("models/vocabulary.pkl", "wb", encoding="utf-8") as f:
             pickle.dump(vocab, f)
         print("dictionary len ", len(vocab))
