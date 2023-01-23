@@ -1,7 +1,7 @@
 """ юнит-тесты для NLP """
 import unittest
 from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad, \
-    get_3_rand_indices, lemmatize, remove_stopwords
+    get_3_rand_indices, lemmatize, remove_stopwords, str_to_list
 
 
 class TestRecommender(unittest.TestCase):
@@ -45,7 +45,7 @@ class TestRecommender(unittest.TestCase):
         self.assertEqual(result, ["0", "1", "2", "3", "4"], "result size == 5")
 
     def test_get_3_rand_indices(self):
-        """ test get_3_rand_indices """
+        """ юнит-тест для get_3_rand_indices """
         words = ["aa", "aaa", "aaaa"]
         syn_map = {"aa": 1, "aaa": 2, "aaaa": 3}
 
@@ -60,7 +60,7 @@ class TestRecommender(unittest.TestCase):
 
     # process_synsets
     def test_lemmatize(self):
-        """ test lemmatize """
+        """ юнит-тест для lemmatize """
         array = ["роза", "упала"]
 
         result = lemmatize(array)
@@ -70,13 +70,29 @@ class TestRecommender(unittest.TestCase):
         self.assertEqual(result[1], "упасть", "==")
 
     def test_remove_stopwords(self):
-        """ test remove_stopwords """
+        """ юнит-тест для remove_stopwords """
         array = ["а", "роза", "и", "упала"]
 
         result = remove_stopwords(array)
 
         self.assertIsNotNone(result, "не пустой")
         self.assertEqual(result, "роза упала", "==")
+
+    def test_str_to_list(self):
+        """ юнит-тест для str_to_list function """
+        array = "[а,роза,и,упала]\n"
+
+        result = str_to_list(array)
+
+        self.assertEqual(result, ["а", "роза", "и", "упала"], "==")
+
+    def test_str_to_list_negatively(self):
+        """ юнит-тест для str_to_list function """
+        array = "\n"
+
+        result = str_to_list(array)
+
+        self.assertEqual(result, [""], "empty list")
 
 
 if __name__ == "__main__":
