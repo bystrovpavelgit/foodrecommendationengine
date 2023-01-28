@@ -15,13 +15,13 @@ def reorder_ids_by_index(index: list, messages: list, ids: list) -> tuple:
     """
     msg_len = len(messages)
     good_indices = set(index).intersection(set(range(msg_len)))
-    if msg_len != len(ids) or msg_len != len(index):
-        logging.error(
-            "разный размер полученных списков в reorder_ids_by_index")
-        return [], []
     if msg_len == 0 or len(ids) == 0 or len(index) == 0:
         logging.error(
             "один из полученных списков пустой в reorder_ids_by_index")
+        return [], []
+    if msg_len != len(ids) or msg_len != len(index):
+        logging.error(
+            "разный размер полученных списков в reorder_ids_by_index")
         return [], []
     if len(good_indices) == 0:
         logging.error(
