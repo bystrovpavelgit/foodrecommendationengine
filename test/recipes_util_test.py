@@ -22,7 +22,7 @@ class TestRecipesUtil(unittest.TestCase):
         self.assertEqual(result, ["а", "роза", "и", "упала"], "==")
 
     def test_reorder_ids_by_index_negatively1(self):
-        """ test reorder_ids_by_index function when inputs are empty"""
+        """negative test of reorder_ids_by_index() when inputs are empty"""
         indices = []
         msg = []
         ids = []
@@ -39,7 +39,8 @@ class TestRecipesUtil(unittest.TestCase):
         self.assertEqual(ids3, [], "empty")
 
     def test_reorder_ids_by_index_negatively2(self):
-        """ test reorder_ids_by_index function
+        """
+            negative test of reorder_ids_by_index function
             when inputs have different size
         """
         indices = [0]
@@ -52,7 +53,7 @@ class TestRecipesUtil(unittest.TestCase):
         self.assertEqual(ids1, [], "empty")
 
     def test_reorder_ids_by_index_negatively3(self):
-        """ test reorder_ids_by_index function
+        """ negative test of reorder_ids_by_index function
             when indices greater than length of list
         """
         indices = [5, 6]
@@ -64,8 +65,23 @@ class TestRecipesUtil(unittest.TestCase):
         self.assertEqual(msg1, [], "empty")
         self.assertEqual(ids1, [], "empty")
 
+    def test_reorder_ids_by_index(self):
+        """ test of reorder_ids_by_index function
+            when indices greater than length of list
+        """
+        indices = [2, 1, 0]
+        msg = ["m1", "m2", "m3"]
+        ids = [0, 1, 2]
+
+        msg1, ids1 = reorder_ids_by_index(indices, msg, ids)
+
+        self.assertEqual(msg1[0], "m3", "== m3")
+        self.assertEqual(msg1[2], "m1", "== m1")
+        self.assertEqual(ids1[0], 2, "== 2")
+        self.assertEqual(ids1[2], 0, "== 0")
+
     def test_find_enough_recommended_recipes_negatively(self):
-        """ test find_enough_recommended_recipes function
+        """ test of find_enough_recommended_recipes function
             when cuisine and ish type are None
         """
         cuisine, dish = None, None
