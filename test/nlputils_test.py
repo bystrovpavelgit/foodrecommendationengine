@@ -1,7 +1,8 @@
 """ юнит-тесты для NLP """
 import unittest
 from webapp.utils.nlp_util import truncate_or_pad, get_text_array, pad, \
-    get_3_rand_indices, lemmatize, remove_stopwords, str_to_list
+    get_3_rand_indices, lemmatize, remove_stopwords, str_to_list, \
+    get_random_synonyms
 
 
 class TestRecommender(unittest.TestCase):
@@ -93,6 +94,34 @@ class TestRecommender(unittest.TestCase):
         result = str_to_list(array)
 
         self.assertEqual(result, [""], "empty list")
+
+    def test_get_random_synonyms(self):
+        """ юнит-тест для get_random_synonyms """
+        constants = ["b", "c", "d", "e"]
+        indices = (0, 1)
+        arr = ["a", "a"]
+        similar = {"a": ["b", "c", "d", "e"]}
+
+        synonyms = get_random_synonyms(arr, indices, similar)
+
+        self.assertEqual(len(synonyms), 2, "== 2")
+        self.assertEqual(synonyms[0][1], 0, "== 0")
+        self.assertTrue(synonyms[0][0] in constants)
+        self.assertEqual(synonyms[1][1], 1, "== 1")
+        self.assertTrue(synonyms[1][0] in constants)
+
+    def test_get_random_synonyms2(self):
+        """ юнит-тест 2 для get_random_synonyms """
+        constants = ["c", "d", "e"]
+        indices = [0]
+        arr = ["a"]
+        similar = {"a": ["c", "d", "e"]}
+
+        synonyms = get_random_synonyms(arr, indices, similar)
+
+        self.assertEqual(len(synonyms), 1, "== 1")
+        self.assertEqual(synonyms[0][1], 0, "== 0")
+        self.assertTrue(synonyms[0][0] in constants)
 
 
 if __name__ == "__main__":

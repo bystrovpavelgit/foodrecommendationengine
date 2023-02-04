@@ -31,6 +31,7 @@ ninja
 flask-migrate
 scipy
 nltk
+pymystem3
 sqlalchemy
 tensorflow
 bs4

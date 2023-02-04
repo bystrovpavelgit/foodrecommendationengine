@@ -104,14 +104,19 @@ def get_3_rand_indices(lemmas, syn_map):
 
 def get_random_synonyms(lemmas, indices, syn_map):
     """ get 3 random synonyms with its index """
+    if len(lemmas) != len(indices):  # length check
+        return []
+    for word in lemmas:              # additional check
+        if word not in syn_map:
+            return []
     result = [(np.random.choice(syn_map[lemmas[ndx]]), ndx) for ndx in indices]
     return result
 
 
-def get_similar_directions(directions_tokenized, syn_map):
+def get_similar_directions(directions_tokenized, syn_map, n_copies=3):
     """ get similar directions  """
     result = []
-    for i in range(3):
+    for num in range(n_copies):
         indices = get_3_rand_indices(directions_tokenized, syn_map)
         synonyms = get_random_synonyms(directions_tokenized, indices, syn_map)
         new_directions = copy(directions_tokenized)
