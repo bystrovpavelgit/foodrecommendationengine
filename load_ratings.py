@@ -38,7 +38,11 @@ def process_recipe_ratings_from_file(name="data/recipe_ratings.csv"):
             rands = ((rands - minn) / maxx) * 100
             for k in range(n):
                 dat = date.today()
-                res[k]["created"] = date.fromisocalendar(dat.year, 1 + int(rands[k]) // 7, 1 + int(rands[k]) % 7)
+                month = 1 + int(rands[k]) // 7
+                day = 1 + int(rands[k]) % 7
+                res[k]["created"] = date.fromisocalendar(dat.year,
+                                                         month,
+                                                         day)
             insert_interactions(res)
     except FileNotFoundError:
         print(f"File not found: {name}")
@@ -52,5 +56,6 @@ if __name__ == "__main__":
         result = process_authors_from_file(name="data/authors.csv")
         print(f"{len(result)} authors loaded")
         # load all interactions
-        result = process_recipe_ratings_from_file(name="data/recipe_ratings.csv")
+        result = process_recipe_ratings_from_file(
+            name="data/recipe_ratings.csv")
         print(f"{len(result)} ratings loaded")

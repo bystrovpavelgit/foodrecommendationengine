@@ -1,7 +1,6 @@
 """ nlp tests """
-import json
-from webapp.utils.nlp_util import replace_special_chars, remove_stopwords, get_text_array,\
-    lemmatize, tokenize, str_to_list
+from webapp.utils.nlp_util import replace_special_chars, remove_stopwords, \
+    get_text_array, lemmatize, tokenize, str_to_list
 
 
 def test_get_text_array():
@@ -29,8 +28,9 @@ def test_replace_special_chars():
 
 def test_lemmatization():
     """ testing lemmatize function """
-    arr = "Марокканский суп с нутом и имбирем еос Морковь, лук, чеснок нарезать, " + \
-          "имбирь натереть на мелкой терке. Обжарить овощи на растительном масле до мягкости."
+    arr = "Марокканский суп с нутом и имбирем еос Морковь, лук, чеснок " + \
+          "нарезать, имбирь натереть на мелкой терке. Обжарить овощи на " + \
+          "растительном масле до мягкости."
 
     text = get_text_array(replace_special_chars(arr.lower()))
     tokenized = lemmatize(tokenize(" ".join(text)))

@@ -29,7 +29,8 @@ def create_template_form(num):
                                  validators=[DataRequired()],
                                  render_kw={"class": "form-control"})
         rows = FieldList(FormField(LapForm), min_entries=num)
-        submit = SubmitField("сохранить", render_kw={"class": "btn btn-primary"})
+        submit = SubmitField("сохранить",
+                             render_kw={"class": "btn btn-primary"})
 
     form = RecipeForm2()
     return form
@@ -45,7 +46,10 @@ def warning(message):
 def fill_recipe(num):
     """ simple cuisine recommendation """
     form = create_template_form(num)
-    return render_template("stat/input_form.html", num=num, title=FILL_RECIPE, form=form)
+    return render_template("stat/input_form.html",
+                           num=num,
+                           title=FILL_RECIPE,
+                           form=form)
 
 
 @blueprint.route("/fill_recipe/<int:num>", methods=["POST"])
@@ -89,7 +93,8 @@ def process_search_cuisine():
     if dish in TYPE_MAP.keys() and cuisine in VALID_CUISINE:
         dish_id = find_recipe_id_by_type_and_cuisine(dish, cuisine)
         return redirect(f"/recommend/recipe/{dish_id}")
-    warning(f"Ошибка валидации поисковой формы с типом:{dish} и кухней:{cuisine}")
+    wrn = f"Ошибка валидации поисковой формы с типом:{dish} и кухней:{cuisine}"
+    warning(wrn)
     return redirect(url_for("stat.search_cuisine"))
 
 
@@ -97,7 +102,9 @@ def process_search_cuisine():
 def new_recipe():
     """ create new recipe """
     form = NumberOfIngredientsForm()
-    return render_template("stat/input_number.html", title=INGREDIENTS_NUM, form=form)
+    return render_template("stat/input_number.html",
+                           title=INGREDIENTS_NUM,
+                           form=form)
 
 
 @blueprint.route("/new_recipe", methods=["POST"])

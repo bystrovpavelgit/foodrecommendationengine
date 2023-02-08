@@ -37,7 +37,8 @@ def find_index_of_form(form, actions, action):
         index = actions.index(form.get(action))
         return index
     except ValueError:
-        logging.error(f"Value Error in find_index_of_form: {form} {actions} {action}")
+        err = f"Value Error in find_index_of_form: {form} {actions} {action}"
+        logging.error(err)
 
 
 def log_and_flash(msg):
@@ -92,7 +93,9 @@ def recipes(type_, filtering):
     """ recipe recommendation """
     user = current_user
     dish_type, cuisine, text = fill_params(type_)
-    messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    messages, ids = find_enough_recommended_recipes(user.id,
+                                                    cuisine,
+                                                    dish_type)
     messages = messages[:9]
     return render_template("recommend/recipes.html",
                            title=RECOMMEND_RECIPES,
@@ -102,16 +105,17 @@ def recipes(type_, filtering):
                            filtering=filtering)
 
 
-@blueprint.route("/recipes/<string:type_>/<string:filtering>", methods=["POST"])
+@blueprint.route("/recipes/<string:type_>/<string:filtering>",
+                 methods=["POST"])
 @login_required
 def process_recipes(type_, filtering):
     """ process recipe recommendation """
     user = current_user
     dish_type, cuisine, text = fill_params(type_)
-    if filtering == USER_BASED:
-        messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
-    elif filtering == ITEM_BASED:
-        messages, ids = find_enough_recommended_recipes(user.id, cuisine, dish_type)
+    if filtering == USER_BASED or filtering == ITEM_BASED:
+        messages, ids = find_enough_recommended_recipes(user.id,
+                                                        cuisine,
+                                                        dish_type)
     else:
         flash(f"Неправильный тип фильтрации {filtering}")
         return redirect(url_for("index"))
@@ -161,7 +165,7 @@ def process_recipe(num):
             index += 1
             user = current_user
             insert_or_update_rating(int(index), user.username, int(num))
-            flash(f"Данные сохранены")
+            flash("Данные сохранены")
             logging.info(f"user:{user.id} /recommend/recipe/{num}")
             return redirect(f"/recommend/recipe/{num}")
         else:

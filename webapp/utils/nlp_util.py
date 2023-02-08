@@ -31,7 +31,10 @@ CUISINES = {"европейская": 1,
 
 def replace_special_chars(text):
     """ replace special chars:  """
-    specials = [("¼", "четверть"), ("½", "половина"), ("⅓", "треть"), ("¾", "три четверти")]
+    specials = [("¼", "четверть"),
+                ("½", "половина"),
+                ("⅓", "треть"),
+                ("¾", "три четверти")]
     for tuple_ in specials:
         text = text.replace(tuple_[0], tuple_[1])
     return text
@@ -97,7 +100,8 @@ def process_synsets(csvfile="./data/yarn-synsets.csv"):
 def get_3_rand_indices(lemmas, syn_map):
     """ get 3 random indices """
     num = len(lemmas)
-    synonyms_exist = np.array([ndx for ndx in range(num) if lemmas[ndx] in syn_map])
+    synonyms_exist = np.array([ndx for ndx in range(num)
+                               if lemmas[ndx] in syn_map])
     np.random.shuffle(synonyms_exist)
     return synonyms_exist.tolist()[:3]
 
@@ -106,7 +110,7 @@ def get_random_synonyms(lemmas, indices, syn_map):
     """ get 3 random synonyms with its index """
     if len(lemmas) != len(indices):  # length check
         return []
-    for word in lemmas:              # additional check
+    for word in lemmas:  # additional check
         if word not in syn_map:
             return []
     result = [(np.random.choice(syn_map[lemmas[ndx]]), ndx) for ndx in indices]
@@ -136,7 +140,8 @@ def get_text_array(data):
 def remove_duplicates(data, mera):
     """ remove duplicates """
     if len(data) >= 3 and len(mera) >= 3:
-        if data[0].strip() == data[1].strip() and mera[0].strip() == mera[1].strip():
+        if data[0].strip() == data[1].strip() and \
+                mera[0].strip() == mera[1].strip():
             return data[2:], mera[2:]
     return data, mera
 
@@ -164,9 +169,11 @@ def recipe_to_mult_texts(recipe, syn_map, end_token):
     three_directions = [name_tokenized + d for d in three_directions]
     directions = [directions_tokenized] + three_directions
     ingredients = get_text_array(recipe.ingredients.lower().replace(".", ","))
-    measures = get_text_array(replace_special_chars(recipe.mera.lower().replace(".", ",")))
+    measures = get_text_array(replace_special_chars(
+        recipe.mera.lower().replace(".", ",")))
     ingredients, measures = remove_duplicates(ingredients, measures)
-    arr = [f"{i.strip()} {element.strip()}" for i, element in zip(ingredients, measures)]
+    arr = [f"{i.strip()} {element.strip()}"
+           for i, element in zip(ingredients, measures)]
     ingredients_tokenized = lemmatize(tokenize(" ".join(arr)))
     all_ingredients = [ingredients_tokenized] * 4
     all_types = [(TYPE_MAP[recipe.typed], CUISINES[recipe.cusine])] * 4
@@ -175,13 +182,17 @@ def recipe_to_mult_texts(recipe, syn_map, end_token):
 
 def tokenize_recipe(recipe, end_token):
     """ convert recipe to text """
-    arr = get_text_array(replace_special_chars(recipe[0]["directions"].lower()))
+    arr = get_text_array(replace_special_chars(
+        recipe[0]["directions"].lower()))
     name_tokenized = tokenize(recipe[0]["name"].lower()) + [end_token]
     directions_tokenized = lemmatize(tokenize(" ".join(arr)))
     directions_tokenized = name_tokenized + directions_tokenized
-    ingredients = get_text_array(recipe[0]["ingredients"].lower().replace(".", ","))
-    measures = get_text_array(replace_special_chars(recipe[0]["mera"].lower().replace(".", ",")))
+    ingredients = get_text_array(
+        recipe[0]["ingredients"].lower().replace(".", ","))
+    measures = get_text_array(
+        replace_special_chars(recipe[0]["mera"].lower().replace(".", ",")))
     ingredients, measures = remove_duplicates(ingredients, measures)
-    arr = [f"{i.strip()} {element.strip()}" for i, element in zip(ingredients, measures)]
+    arr = [f"{i.strip()} {element.strip()}"
+           for i, element in zip(ingredients, measures)]
     ingredients_tokenized = lemmatize(tokenize(" ".join(arr)))
     return directions_tokenized, ingredients_tokenized

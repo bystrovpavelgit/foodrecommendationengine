@@ -7,7 +7,6 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from webapp.db import DB
 from webapp.user.models import User
-from webapp.stat.models import Recipe
 from webapp.calculate.views import blueprint as calc_blueprint
 from webapp.user.views import blueprint as user_blueprint
 from webapp.stat.views import blueprint as stat_blueprint

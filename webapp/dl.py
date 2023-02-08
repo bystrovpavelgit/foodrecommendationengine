@@ -15,8 +15,8 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow import keras
 from webapp.utils.nlp_util import tokenize_recipe, truncate_or_pad
 from keras.layers import Add, Activation, Lambda, Input, Embedding
-from keras.layers import Reshape, Flatten, Dot
-from tensorflow.keras.models import Sequential, Model, load_model, save_model
+from keras.layers import Reshape, Dot
+from tensorflow.keras.models import Model
 from keras.optimizers import Adam
 from tensorflow.keras.regularizers import l2
 
@@ -55,8 +55,11 @@ def predict_types(recipe):
     except FileNotFoundError:
         logging.error(f"No such file or directory {VOCABULARY}")
     part1, part2 = tokenize_recipe(recipe, "еос")
-    dirs = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part1], 0)
-    ingredients = truncate_or_pad([vocab.get(w) if w in vocab else 0 for w in part2], 0)[:100]
+    dirs = truncate_or_pad(
+        [vocab.get(w) if w in vocab else 0 for w in part1], 0)
+    ingredients = truncate_or_pad(
+        [vocab.get(w) if w in vocab else 0 for w in part2],
+        0)[:100]
     res = dirs + ingredients
 
     model = CUISINE_RNN
@@ -139,7 +142,9 @@ class EmbeddingLayer:
         self.n_factors = n_factors
 
     def __call__(self, x):
-        x = Embedding(self.n_items, self.n_factors, embeddings_initializer='he_normal',
+        x = Embedding(self.n_items,
+                      self.n_factors,
+                      embeddings_initializer='he_normal',
                       embeddings_regularizer=l2(1e-6))(x)
         x = Reshape((self.n_factors,))(x)
         return x
@@ -203,7 +208,8 @@ def find_n_closest_users(id_, ids, users_dict, embed, n=20):
     k = users_dict[id_]
     encoded_ids = list(map(lambda x: users_dict[x], minus_one))
     vect = embed[0][k][...]
-    res = [(i, cosine_sim(vect, embed[0][encoded_ids[i]][...])) for i in range(len(minus_one))]
+    res = [(i, cosine_sim(vect, embed[0][encoded_ids[i]][...]))
+           for i in range(len(minus_one))]
     sort = sorted(res, key=lambda x: x[1], reverse=True)
     sort = sort[:n]
     similars = [elem[1] for elem in sort]
@@ -218,7 +224,8 @@ def find_n_closest_items(id_, item_ids, items_dict, items_embed, n=100):
     k = items_dict[id_]
     encoded_ids = list(map(lambda x: items_dict[x], minus_one))
     vect = items_embed[0][k][...]
-    res = [(i, cosine_sim(vect, items_embed[0][encoded_ids[i]][...])) for i in range(len(minus_one))]
+    res = [(i, cosine_sim(vect, items_embed[0][encoded_ids[i]][...]))
+           for i in range(len(minus_one))]
     sort = sorted(res, key=lambda x: x[1], reverse=True)
     sort = sort[:n]
     similars = [elem[1] for elem in sort]
@@ -264,8 +271,10 @@ class CFRecommender:
         if ratings is None:
             print("csv file error")
         self.ratings = ratings
-        x_train, x_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.1, random_state=17)
-        self.X_train_array, self.X_test_array = get_train_test_arrays(x_train, x_test)
+        x_train, x_test, self.y_train, self.y_test = train_test_split(
+            x, y, test_size=0.1, random_state=17)
+        self.X_train_array, self.X_test_array = get_train_test_arrays(
+            x_train, x_test)
         self.n_users = ratings['user'].nunique()
         self.n_items = ratings['recipe'].nunique()
         self.n_factors = n_factors
@@ -297,16 +306,21 @@ class CFRecommender:
         """ установить item_dict """
         self.item_dict = item_dict
 
-    def get_pretrained_embeddings(self, pickle_file="models/users_embedding.pkl"):
+    def get_pretrained_embeddings(self,
+                                  pickle_file="models/users_embedding.pkl"):
         """ get pretrained embeddings """
         with open(pickle_file, "rb") as pkl_file:
             self.users_embedding = pickle.load(pkl_file)
 
     def train_model_and_get_embeddings(self, epochs=2000):
         """ train model and get embeddings """
-        model = recommender_v2(self.n_users, self.n_items, self.n_factors,
-                               min(self.ratings['rating']), max(self.ratings['rating']))
-        model.fit(x=self.X_train_array, y=self.y_train,
+        model = recommender_v2(self.n_users,
+                               self.n_items,
+                               self.n_factors,
+                               min(self.ratings['rating']),
+                               max(self.ratings['rating']))
+        model.fit(x=self.X_train_array,
+                  y=self.y_train,
                   batch_size=128,
                   epochs=epochs,
                   shuffle=True,
@@ -369,15 +383,18 @@ class CFRecommender:
         self.closest_users = tuple_[0]
         self.similarities = tuple_[1]
         actual_items = get_actual_items(self.ratings)
-        rating_list = [self.find_rating_for_dish(user_id,
-                                                 i) for i in actual_items]
+        rating_list = [self.find_rating_for_dish(user_id, i)
+                       for i in actual_items]
         return rating_list[:700]
 
     def find_top_items_for_rating(self, rating_list):
         """ find top 9 items for ratings """
-        zipped = zip(rating_list, self.popularity, list(range(len(rating_list))))
+        zipped = zip(rating_list,
+                     self.popularity,
+                     list(range(len(rating_list))))
         sorted_ratings = sorted(list(zipped), key=lambda x: x[0], reverse=True)
-        top_ratings = [(self.actual_items[el[2]], el[0], el[1]) for el in sorted_ratings]
+        top_ratings = [(self.actual_items[el[2]], el[0], el[1])
+                       for el in sorted_ratings]
         return top_ratings
 
 
@@ -396,6 +413,6 @@ def prepare_embeddings_and_get_top_items(user_id, load_pretrained=True):
     item_dict = get_unique_item_map(ratings, recommender.get_actual_items())
     recommender.set_item_dict(item_dict)
     rating_list = recommender.find_100_closest_ratings_for_user(user_id)
-    top_items_with_rating_and_popularity = recommender.find_top_items_for_rating(
+    top_items_rating_and_popularity = recommender.find_top_items_for_rating(
         rating_list)
-    return top_items_with_rating_and_popularity
+    return top_items_rating_and_popularity

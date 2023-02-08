@@ -17,9 +17,11 @@ def load_eda_ru_urls(html):
     news_list = soup.find_all("script")
     txt = str(news_list[-1]).replace("</script>", "") \
         .replace('<script id="__NEXT_DATA__" type="application/json">', "")
-    data = json.loads("[" + txt + "]")
-    result = [str(e["url"].replace("/recepty/recepty", "/recepty")) for e in
-              data[0]["props"]["pageProps"]["metaData"]['microdata']['itemListElement']]
+    data = json.loads("[" + txt + "]")[0]
+    chk = \
+        data["props"]["pageProps"]["metaData"]['microdata']['itemListElement']
+    result = [str(e["url"].replace("/recepty/recepty", "/recepty"))
+              for e in chk]
     return result
 
 
@@ -53,8 +55,10 @@ def get_photo_url(soup):
 def get_ingredients(soup):
     """ get_ingredients function """
     ingrs = soup.find_all("div", class_="emotion-ydhjlb")
-    ingredients_list = [i.find_next("span", itemprop="recipeIngredient").text for i in ingrs]
-    result = [i.find_next("span", class_="emotion-15im4d2").text for i in ingrs]
+    ingredients_list = [i.find_next("span", itemprop="recipeIngredient").text
+                        for i in ingrs]
+    result = [i.find_next("span", class_="emotion-15im4d2").text
+              for i in ingrs]
     n = len(ingredients_list)
     if n > 3 and ingredients_list[0] == ingredients_list[1] and \
             ingredients_list[0] == ingredients_list[2]:
@@ -67,7 +71,8 @@ def get_directions(soup):
     directions = soup.find_all("span", class_="emotion-6kiu05")
     if len(directions) > 0:
         res = [e.find_next("span",
-                           itemprop="text").text.replace("\xa0", " ") for e in directions]
+                           itemprop="text").text.replace("\xa0", " ")
+               for e in directions]
         return res
 
 

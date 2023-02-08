@@ -1,6 +1,6 @@
 """
     Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
-    web util
+    web utility module
 """
 from bs4 import BeautifulSoup
 import logging
@@ -20,9 +20,11 @@ def get_html(link):
         result.raise_for_status()
         return result.text
     except (HTTPError, ConnectTimeout, ReadTimeout, Timeout, ConnectionError):
-        logging.error("ошибка ConnectTimeout или HTTP ошибка в функции get_html")
+        err = "ошибка ConnectTimeout или HTTP ошибка в функции get_html"
+        logging.error(err)
     except (requests.RequestException, ValueError):
-        logging.error("ошибки RequestException или ValueError в функции get_html")
+        err = "ошибки RequestException или ValueError в функции get_html"
+        logging.error(err)
     return False
 
 
