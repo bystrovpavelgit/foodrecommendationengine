@@ -33,13 +33,10 @@ def save_row(csvfile, name, text, ingredients, dish_type, cuisine):
     csvfile.writerow(new_row)
 
 
-if __name__ == "__main__":
-    # main method
-    special_tokens = [" еос "]
-    app = create_app()
-    with app.app_context():
-        syn_map = process_synsets(csvfile="data/yarn-synsets.csv")
-        continuous_text = []
+def process_recipes_nlp_data(syn_map, special_token):
+    """ process nlp data of recipes"""
+    continuous_text = []
+    try:
         with open("models/recipes_nlp_data.csv", "w", encoding="utf-8") as cf:
             fields = ["name", "text", "ingreds", "dish_type", "cuisine"]
             cc = csv.DictWriter(cf, fieldnames=fields, delimiter=",")
@@ -47,7 +44,7 @@ if __name__ == "__main__":
             num = 0
             for recipe in Note.query.order_by(Note.id).all():
                 dirs, ingreds, y_true = \
-                    recipe_to_mult_texts(recipe, syn_map, special_tokens[0])
+                    recipe_to_mult_texts(recipe, syn_map, special_token)
                 if num < 3500:
                     for k in range(4):
                         continuous_text = continuous_text + dirs[k] + \
@@ -66,9 +63,23 @@ if __name__ == "__main__":
                              replace_special_chars(" ".join(ingreds[0])),
                              y_true[0][0],
                              y_true[0][1])
-        counts = nltk.FreqDist(continuous_text).most_common(22000)
-        vocab = {x[0]: (n + 1) for n, x in enumerate(counts)}
-        # save vocabulary
-        with open("models/vocabulary.pkl", "wb", encoding="utf-8") as f:
-            pickle.dump(vocab, f)
-        print("dictionary len ", len(vocab))
+                num += 1
+    except FileNotFoundError:
+        print("directory ./models does not exist")
+        return
+    return continuous_text
+
+
+if __name__ == "__main__":
+    # main method
+    special = " еос "
+    app = create_app()
+    with app.app_context():
+        synonym_map = process_synsets(csvfile="data/yarn-synsets.csv")
+        texts = process_recipes_nlp_data(synonym_map, special)
+        if texts is not None:
+            counts = nltk.FreqDist(texts).most_common(22000)
+            vocab = {x[0]: (n + 1) for n, x in enumerate(counts)}
+            with open("models/vocabulary.pkl", "wb", encoding="utf-8") as f:
+                pickle.dump(vocab, f)
+            print("dictionary len ", len(vocab))

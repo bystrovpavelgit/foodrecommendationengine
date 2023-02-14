@@ -26,7 +26,7 @@ def get_dishes(url_link, element, dish_type, num):
 def get_loaded_urls():
     """ loaded urls """
     try:
-        res = Note.query.limit(9000)
+        res = Note.query.limit(20000)
         result = [note.url for note in res]
         return result
     except (SQLAlchemyError, IntegrityError) as ex:

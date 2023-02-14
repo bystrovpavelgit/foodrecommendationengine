@@ -29,7 +29,7 @@ CUISINES = {"европейская": 1,
             }
 
 
-def replace_special_chars(text):
+def replace_special_chars(text: str) -> str:
     """ replace special chars:  """
     specials = [("¼", "четверть"),
                 ("½", "половина"),
@@ -65,6 +65,8 @@ def tokenize(text: str) -> list:
 
 def remove_stopwords(words: list) -> str:
     """ remove stopwords """
+    if not words:
+        return ""
     the_stopwords = my_stopwords
     res = " ".join([token for token in words
                     if token not in the_stopwords]).strip()
@@ -73,6 +75,8 @@ def remove_stopwords(words: list) -> str:
 
 def lemmatize(text: list) -> list:
     """ lemmatize """
+    if not text:
+        return []
     mystem = Mystem()
     text = " ".join(text)
     return [wo for wo in mystem.lemmatize(text) if wo not in [" ", "\n"]]
@@ -80,6 +84,8 @@ def lemmatize(text: list) -> list:
 
 def process_synsets(csvfile="./data/yarn-synsets.csv"):
     """ process YARN synonyms """
+    if csvfile is None:
+        return {}
     syn_map = {"": []}
     with open(csvfile, "r") as csvf:
         fields = ['id', 'words', 'grammar', 'domain']
@@ -99,6 +105,8 @@ def process_synsets(csvfile="./data/yarn-synsets.csv"):
 
 def get_3_rand_indices(lemmas, syn_map):
     """ get 3 random indices """
+    if lemmas is None or syn_map is None:
+        return []
     num = len(lemmas)
     synonyms_exist = np.array([ndx for ndx in range(num)
                                if lemmas[ndx] in syn_map])
@@ -108,6 +116,8 @@ def get_3_rand_indices(lemmas, syn_map):
 
 def get_random_synonyms(lemmas, indices, syn_map):
     """ get 3 random synonyms with its index """
+    if lemmas is None or syn_map is None or indices is None:
+        return []
     if len(lemmas) != len(indices):  # length check
         return []
     for word in lemmas:  # additional check
@@ -119,6 +129,8 @@ def get_random_synonyms(lemmas, indices, syn_map):
 
 def get_similar_directions(directions_tokenized, syn_map, n_copies=3):
     """ get similar directions  """
+    if not directions_tokenized or not syn_map:
+        raise ValueError("Empty parameters for get_similar_directions")
     result = []
     for num in range(n_copies):
         indices = get_3_rand_indices(directions_tokenized, syn_map)
@@ -130,7 +142,7 @@ def get_similar_directions(directions_tokenized, syn_map, n_copies=3):
     return result
 
 
-def get_text_array(data):
+def get_text_array(data: str) -> list:
     """ get text array """
     data = data.replace("'", "")
     tokens = data.split(",")
@@ -139,6 +151,8 @@ def get_text_array(data):
 
 def remove_duplicates(data, mera):
     """ remove duplicates """
+    if not data or not mera:
+        raise ValueError("empty parameter in remove_duplicates")
     if len(data) >= 3 and len(mera) >= 3:
         if data[0].strip() == data[1].strip() and \
                 mera[0].strip() == mera[1].strip():
@@ -146,7 +160,7 @@ def remove_duplicates(data, mera):
     return data, mera
 
 
-def pad(arr, padding, max_len=MAX_LEN):
+def pad(arr: list, padding: int, max_len: int = MAX_LEN) -> list:
     """ pad to MAX_LEN words"""
     result = arr + ([padding] * max(max_len - len(arr), 0))
     return result
@@ -154,6 +168,8 @@ def pad(arr, padding, max_len=MAX_LEN):
 
 def truncate_or_pad(arr, padding, max_len=MAX_LEN):
     """ truncate or pad array """
+    if arr is None or padding is None:
+        raise ValueError("empty parameter in pad function")
     if len(arr) < max_len:
         return pad(arr, padding, max_len=max_len)
     return arr[:max_len]

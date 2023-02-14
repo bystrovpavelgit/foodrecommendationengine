@@ -29,5 +29,5 @@ export FLASK_APP=webapp && export FLASK_ENV=development && export FLASK_DEBUG=1 
 
 ## Пример найденных рецептов на основе Collaborative Filtering
 
-![Screenshot](img/Recepty.jpg)
+![Screenshot](img/Recepty.png)
 ## End

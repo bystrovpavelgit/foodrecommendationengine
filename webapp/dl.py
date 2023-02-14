@@ -263,6 +263,7 @@ def average_rating(k, ratings):
     return sum_
 
 
+# github.com/rdevooght/sequence-based-recommendations.
 class CFRecommender:
     """ Recommender of dishes using collaborative filtration """
 
@@ -334,6 +335,10 @@ class CFRecommender:
             (User based Collaborative Filtering)
             arguments user_id and item_id
         """
+        if user_id not in self.user_dict:
+            raise ValueError("user_id is not in database")
+        if item_id not in self.item_dict:
+            raise ValueError("item_id is not in database")
         dish = self.item_dict[item_id]
         avg_u = average_rating(self.user_dict[user_id], self.matr)
         weighted_sum = 0.
@@ -350,8 +355,8 @@ class CFRecommender:
         return 1
 
     def find_item_based_rating_for_dish(self, user_id, item_id):
-        """ Вычисление оценки рейтинга по схожим клиентам
-            (User based Collaborative Filtering)
+        """ Вычисление оценки рейтинга по схожим клиентам   # TO_DO
+            (Item based Collaborative Filtering)
             arguments user_id and item_id
         """
         dish = self.item_dict[item_id]

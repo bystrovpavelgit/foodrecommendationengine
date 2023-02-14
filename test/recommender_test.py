@@ -51,8 +51,7 @@ class TestRecommender(unittest.TestCase):
                         "users_embedding не пустой")
 
     def test_find_rating_for_dish(self):
-        """ test_find_rating_for_dish юнит-тест """
-        print("юнит-тест find_rating_for_dish")
+        """ юнит-тест для find_rating_for_dish """
         self.assertIsNone(self.recommender.users_embedding,
                           "users_embedding не пустой")
 
@@ -60,6 +59,28 @@ class TestRecommender(unittest.TestCase):
         rate = self.recommender.find_rating_for_dish(2, 350)
 
         self.assertEqual(rate, 1., "item_rating для блюда 350 = 1.")
+
+    def test_find_rating_for_dish_negatively1(self):
+        """ юнит-тест #2 для find_rating_for_dish  """
+        self.assertIsNone(self.recommender.users_embedding,
+                          "users_embedding не пустой")
+
+        self.prepare_data()
+        try:
+            rate = self.recommender.find_rating_for_dish(0, 350)
+        except ValueError as err:
+            self.assertIsNotNone(err, "ValueError != None")
+
+    def test_find_rating_for_dish_negatively2(self):
+        """  юнит-тест #3 для find_rating_for_dish """
+        self.assertIsNone(self.recommender.users_embedding,
+                          "users_embedding не пустой")
+
+        self.prepare_data()
+        try:
+            rate = self.recommender.find_rating_for_dish(2, 0)
+        except ValueError as err:
+            self.assertIsNotNone(err, "ValueError != None")
 
     def test_find_top_items_for_rating(self):
         """ test_find_top_items_for_rating юнит-тест """
