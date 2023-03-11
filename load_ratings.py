@@ -4,7 +4,8 @@ import csv
 from datetime import date
 import numpy as np
 from webapp import create_app
-from webapp.business_logic import insert_authors, insert_interactions
+from webapp.stat.models import Author, Interactions
+from webapp.business_logic import bulk_insert
 
 
 def process_authors_from_file(name="data/authors.csv"):
@@ -16,7 +17,7 @@ def process_authors_from_file(name="data/authors.csv"):
             rows = csv.DictReader(f, fields, delimiter=',')
             res = [{"id": int(row["user_id"]), "name": row["name"]} for row in
                    rows if row["user_id"] != "user_id"]
-            insert_authors(res)
+            bulk_insert(Author, res)
     except FileNotFoundError:
         print(f"File not found: {name}")
     return res
@@ -43,7 +44,7 @@ def process_recipe_ratings_from_file(name="data/recipe_ratings.csv"):
                 res[k]["created"] = date.fromisocalendar(dat.year,
                                                          month,
                                                          day)
-            insert_interactions(res)
+            bulk_insert(Interactions, res)
     except FileNotFoundError:
         print(f"File not found: {name}")
     return res

@@ -2,17 +2,18 @@
     Apache License 2.0 Copyright (c) 2022 Pavel Bystrov
     blueprint for statistics
 """
+import logging
 from flask import render_template, flash, redirect, url_for, Blueprint, request
 from flask_wtf import FlaskForm
-import logging
 from wtforms import FormField, FieldList, StringField, SubmitField
 from wtforms.validators import DataRequired
-from webapp.business_logic import insert_recipe_data, \
+from webapp.business_logic import bulk_insert, \
     find_recipe_id_by_type_and_cuisine
+from webapp.config import VALID_CUISINE, TYPE_MAP, FILL_RECIPE, INGREDIENTS_NUM
 from webapp.dl import predict_types
 from webapp.stat.forms import NumberOfIngredientsForm, LapForm
-from webapp.config import VALID_CUISINE, TYPE_MAP, FILL_RECIPE,\
-    INGREDIENTS_NUM
+from webapp.stat.models import Note
+
 
 blueprint = Blueprint("stat", __name__, url_prefix="/stat")
 
@@ -42,6 +43,26 @@ def warning(message):
     flash(message)
 
 
+def load_form_data(cur_form):
+    """ load data using form and return data, type, and cuisine """
+    ingredients = f"{[el['ingredient'] for el in cur_form.rows.data]}"
+    mera = f"{[el['how_much'] for el in cur_form.rows.data]}"
+    data = [{"name": cur_form.dish.data,
+             "pic_url": "",
+             "pic": "",
+             "ingredients": ingredients,
+             "mera": mera,
+             "directions": f"{cur_form.directions.data}",
+             "cusine": "",
+             "typed": "",
+             "url": "manual"}]
+    cuisine, type_ = predict_types(data)
+    data[0]["cusine"] = cuisine
+    data[0]["typed"] = type_
+    result = (data, type_, cuisine)
+    return result
+
+
 @blueprint.route("/fill_recipe/<int:num>", methods=["GET"])
 def fill_recipe(num):
     """ simple cuisine recommendation """
@@ -57,21 +78,8 @@ def process_fill_recipe(num):
     """ simple cuisine recommendation """
     form = create_template_form(num)
     if form.validate_on_submit():
-        ingredients = f"{[el['ingredient'] for el in form.rows.data]}"
-        mera = f"{[el['how_much'] for el in form.rows.data]}"
-        data = [{"name": form.dish.data,
-                 "pic_url": "",
-                 "pic": "",
-                 "ingredients": ingredients,
-                 "mera": mera,
-                 "directions": f"{form.directions.data}",
-                 "cusine": "",
-                 "typed": "",
-                 "url": "manual"}]
-        cuisine, type_ = predict_types(data)
-        data[0]["cusine"] = cuisine
-        data[0]["typed"] = type_
-        insert_recipe_data(data)
+        data, type_, cuisine = load_form_data(form)
+        bulk_insert(Note, data)
         flash(f"Рецепт сохранен - Тип {type_} кухня {cuisine}")
         return render_template("index.html")
     warning("Ошибка валидации рецепта блюда")
@@ -112,7 +120,7 @@ def process_new_recipe():
     """ process new recipe """
     form = NumberOfIngredientsForm()
     if form.validate_on_submit():
-        num = int(form.number.data)
+        num = form.number.data
         return redirect(f"/stat/fill_recipe/{num}")
     warning("Ошибка валидации формы с количеством ингредиентов")
     return redirect(url_for("stat.new_recipe"))

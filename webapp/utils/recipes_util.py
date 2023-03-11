@@ -16,21 +16,20 @@ def reorder_ids_by_index(index: list, messages: list, ids: list) -> tuple:
     msg_len = len(messages)
     good_indices = set(index).intersection(set(range(msg_len)))
     if msg_len == 0 or len(ids) == 0 or len(index) == 0:
-        logging.error(
-            "один из полученных списков пустой в reorder_ids_by_index")
+        logging.error("один из входных списков пустой в reorder_ids_by_index")
         return [], []
     if msg_len != len(ids) or msg_len != len(index):
-        logging.error(
-            "разный размер полученных списков в reorder_ids_by_index")
+        logging.error("разный размер входных списков в reorder_ids_by_index")
         return [], []
     if len(good_indices) == 0:
         logging.error(
             "все индексы из списка index не соответствуют входным данным")
         return [], []
     ids_map = {el: ndx for ndx, el in enumerate(ids)}
-    result = [(messages[ids_map[i]], i) for i in index if i in ids_map.keys()]
-    msgs = [el[0] for el in result]
-    reordered_ids = [el[1] for el in result]
+    result = [(messages[ids_map[ind]], ind)
+              for ind in index if ind in ids_map.keys()]
+    msgs = [obj[0] for obj in result]
+    reordered_ids = [obj[1] for obj in result]
     return msgs, reordered_ids
 
 

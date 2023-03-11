@@ -9,9 +9,6 @@ from webapp.utils.recipes_util import to_list, \
 
 class TestRecipesUtil(unittest.TestCase):
     """ recipes util Test """
-    def setUp(self) -> None:
-        """ setUp """
-        self.num = 5
 
     def test_to_list(self):
         """ юнит-тест для str_to_list function """
