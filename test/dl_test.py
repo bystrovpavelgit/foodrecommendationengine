@@ -41,6 +41,15 @@ class DeepLearningTest(unittest.TestCase):
         self.assertTrue(similarity1 > 0.99, "cosine similarity равна 1")
         self.assertTrue(similarity2 < 0.9, "cosine similarity меньше 0.9")
 
+    def test_cosine_sim2(self):
+        """ cosine similarity юнит-тест """
+        vector1 = np.array([1, -1, 1, -1])
+        vector2 = np.array([1, -1, 1, -1])
+
+        similarity1 = cosine_sim(vector1, vector2)
+
+        self.assertTrue(similarity1 > 0.995, "cosine similarity равна 1")
+
     def test_average_rating(self):
         """ """
         user_id = 3

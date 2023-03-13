@@ -12,10 +12,10 @@ class Holder:
 
 class FormTester:
     """ Form Tester"""
-    def __init__(self, dish, how_to, ingredients):
+    def __init__(self, dish, directions, ingredients):
         """ init method """
         self.dish = Holder(dish)
-        self.how_to = Holder(how_to)
+        self.directions = Holder(directions)
         self.rows = Holder(ingredients)
 
 
@@ -40,8 +40,8 @@ class StatViewsTest(unittest.TestCase):
         self.assertEqual(res_json[0]["name"], "Сэндвичи с уткой")
         self.assertTrue("pic_url" in res_json[0])
         self.assertTrue("pic" in res_json[0])
-        self.assertEqual(res_json[0]["ingredients"], "[Утка, Салями]")
-        self.assertEqual(res_json[0]["mera"], "[8 кусков, 8 кусков]")
+        self.assertEqual(res_json[0]["ingredients"], "['Утка', 'Салями']")
+        self.assertEqual(res_json[0]["mera"], "['8 кусков', '8 кусков']")
         self.assertEqual(res_json[0]["directions"], txt)
         self.assertTrue("cusine" in res_json[0])
         self.assertTrue("typed" in res_json[0])
