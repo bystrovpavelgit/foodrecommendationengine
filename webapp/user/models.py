@@ -13,6 +13,7 @@ class User(DB.Model, UserMixin):
     username = DB.Column(DB.String(64), index=True, unique=True)
     password = DB.Column(DB.String(128))
     role = DB.Column(DB.String(10), index=True)
+    update_ts = DB.Column(DB.Date)
 
     @property
     def is_admin(self):
