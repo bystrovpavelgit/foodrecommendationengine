@@ -29,12 +29,11 @@ class TestRecommender(unittest.TestCase):
 
     def test_truncate_or_pad_negatively(self):
         """ юнит-тест для truncate_or_pad """
-        try:
-            res = truncate_or_pad(None, None, max_len=self.max_len)
-
-            self.assertIsNotNone(res, "не пустой")
-        except ValueError as err:
-            self.assertIsNotNone(err, "не пустой")
+        self.assertRaises(ValueError,
+                          truncate_or_pad,
+                          None,
+                          None,
+                          max_len=self.max_len)
 
     def test_get_array(self):
         """ юнит-тест для pad """
@@ -188,39 +187,23 @@ class TestRecommender(unittest.TestCase):
 
     def test_get_similar_directions_negatively2(self):
         """ юнит-тест для get_similar_directions """
-        try:
-            result = get_similar_directions(None, None)
-
-            self.assertIsNotNone(result, "не пустой")
-        except ValueError as err:
-            self.assertIsNotNone(err)
+        self.assertRaises(ValueError, get_similar_directions, None, None)
 
     def test_get_similar_directions_negatively3(self):
         """ юнит-тест для get_similar_directions """
-        try:
-            result = get_similar_directions([], {})
+        empty = []
 
-            self.assertIsNotNone(result, "не пустой")
-        except ValueError as err:
-            self.assertIsNotNone(err)
+        self.assertRaises(ValueError, get_similar_directions, empty, {})
 
     def test_remove_duplicates_negatively1(self):
         """ юнит-тест для remove_duplicates """
-        try:
-            result = remove_duplicates(None, None)
+        empty = None
 
-            self.assertIsNotNone(result, "не пустой")
-        except ValueError as err:
-            self.assertIsNotNone(err)
+        self.assertRaises(ValueError, remove_duplicates, empty, empty)
 
     def test_remove_duplicates_negatively2(self):
         """ юнит-тест для remove_duplicates """
-        try:
-            result = remove_duplicates([], [])
-
-            self.assertIsNotNone(result, "не пустой")
-        except ValueError as err:
-            self.assertIsNotNone(err)
+        self.assertRaises(ValueError, remove_duplicates, [], [])
 
 
 if __name__ == "__main__":
